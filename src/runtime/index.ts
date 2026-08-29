@@ -15,4 +15,13 @@ export {
 export { mount, type MountHandle, type MountOptions } from './mount.js';
 export { PageLoader, PageNotFoundError } from './page.js';
 export { createRouter, type Router, type RouterMode } from './router.js';
+export {
+  createThemeController,
+  DEFAULT_THEME_STORAGE_KEY,
+  type ResolvedTheme,
+  type ThemeController,
+  type ThemeControllerOptions,
+  type ThemeMode,
+  themeInitScript,
+} from './theme.js';
 export { version } from '../version.js';

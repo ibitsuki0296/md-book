@@ -97,6 +97,31 @@ Run the example site (`examples/docs/`):
 npm run example   # build + serve at http://localhost:4173
 ```
 
+## Theming (implemented now)
+
+The public theming API is a set of namespaced CSS custom properties
+(`--md-book-*`) in `dist/style.css`. Everything the runtime renders is styled
+through them, so **a theme is just a stylesheet that redefines tokens** — load it
+after `style.css`:
+
+```html
+<link rel="stylesheet" href="@md-book/core/style.css" />
+<link rel="stylesheet" href="@md-book/core/themes/ink.css" />   <!-- or your own -->
+```
+
+The bundled rules live in `@layer md-book.tokens, .base, .layout, .content,
+.components`, so any unlayered rule you add wins without specificity fights.
+`themes/default.css` is a copy-paste template listing every token.
+
+Light/dark: tokens are redefined for `@media (prefers-color-scheme: dark)` (unless
+`data-theme="light"`) and for `data-theme="dark"`. The runtime `createThemeController()`
+sets `data-theme` on `<html>`, persists the choice, emits `md-book:themechange`,
+and `mount()` adds a header toggle (disable with `theme: { toggle: false }`).
+Paste `themeInitScript()` into `<head>` to avoid a flash of the wrong theme.
+
+`npm run validate:tokens` fails the build if a raw colour literal sneaks into a
+component stylesheet instead of a token.
+
 ## Development
 
 ```bash
@@ -120,7 +145,7 @@ for the full requirements doc. Milestones:
 | **M1 core** *(done)* | Markdown pipeline, front matter, TOC, link rewrite, containers |
 | **M2 content model** *(done)* | Manifest type + validation, route resolution, nav/sidebar, prev/next, `md-book manifest` + `md-book dev` |
 | **M3 runtime UI** *(done)* | `<md-book>` element + `mount()`, client router, app shell, page loader/cache, scroll-spy, code copy, CDN global build |
-| M4 | Theming: token CSS + `@layer`, light/dark, `setTheme`, FOUC guard, token validator |
+| **M4 theming** *(done)* | `--md-book-*` token contract, `@layer` stylesheet, light/dark, theme controller + FOUC guard + header toggle, reference themes, token validator |
 | M5 | Blog: post collection, pagination, tag/category pages, RSS/Atom/JSON feed |
 | M6 | a11y, size budget, SEO meta, demo site, docs, distribution (ESM/CJS/UMD/CSS), first release |
 

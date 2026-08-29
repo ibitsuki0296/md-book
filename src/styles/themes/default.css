@@ -1,0 +1,42 @@
+/*
+ * md-book theme template — every token with its default value.
+ *
+ * Copy this file, change values, and load it AFTER the md-book stylesheet:
+ *
+ *   <link rel="stylesheet" href="md-book/style.css">
+ *   <link rel="stylesheet" href="my-theme.css">
+ *
+ * Loading it unlayered (as below) means it always wins over the defaults.
+ * Provide a `[data-theme="dark"]` block too if your theme supports dark mode.
+ */
+
+:root {
+  /* Palette primitives — remap these to recolour everything at once. */
+  --md-book-brand-500: #3b82f6;
+  --md-book-brand-600: #2563eb;
+  --md-book-brand-700: #1d4ed8;
+
+  /* Semantic colour */
+  --md-book-color-bg: #ffffff;
+  --md-book-color-fg: #23272f;
+  --md-book-color-fg-muted: #6b7280;
+  --md-book-color-surface: #f7f8fa;
+  --md-book-color-surface-hover: #eceef2;
+  --md-book-color-border: #dde0e7;
+  --md-book-color-accent: var(--md-book-brand-600);
+  --md-book-color-accent-hover: var(--md-book-brand-700);
+  --md-book-color-accent-fg: #ffffff;
+
+  /* Typography */
+  --md-book-font-body: ui-sans-serif, system-ui, sans-serif;
+  --md-book-font-heading: var(--md-book-font-body);
+  --md-book-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --md-book-text-base: 1rem;
+  --md-book-leading: 1.7;
+
+  /* Layout & shape */
+  --md-book-measure: 46rem;
+  --md-book-sidebar-width: 16rem;
+  --md-book-toc-width: 14rem;
+  --md-book-radius: 0.5rem;
+}

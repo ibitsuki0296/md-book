@@ -1,0 +1,19 @@
+/*
+ * md-book stylesheet entry.
+ *
+ * All rules live in the `md-book.*` cascade layers declared below. Any
+ * stylesheet you load AFTER this one, with its rules unlayered, wins over
+ * everything here regardless of selector specificity — that is the supported
+ * way to override the defaults. A theme only needs to redefine `--md-book-*`
+ * tokens (see tokens.css); structural overrides go in an unlayered rule.
+ *
+ * `dist/style.css` is this file with the imports inlined (see scripts/build-css.mjs).
+ */
+
+@layer md-book.tokens, md-book.base, md-book.layout, md-book.content, md-book.components;
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./content.css";
+@import "./components.css";

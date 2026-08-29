@@ -16,7 +16,7 @@ const SLOT_ATTR_MAP: Record<string, 'navbarEnd' | 'sidebarTop' | 'pageFooter'> =
  */
 export class MdBookElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ['manifest', 'base', 'router', 'heading'];
+    return ['manifest', 'base', 'router', 'heading', 'theme'];
   }
 
   private handle: MountHandle | null = null;
@@ -56,6 +56,10 @@ export class MdBookElement extends HTMLElement {
     if (heading) options.title = heading;
     const router = this.getAttribute('router');
     if (router === 'hash' || router === 'history') options.routerMode = router as RouterMode;
+    const themeMode = this.getAttribute('theme');
+    if (themeMode === 'light' || themeMode === 'dark' || themeMode === 'system') {
+      options.theme = { default: themeMode };
+    }
 
     try {
       this.handle = await mount(this, options);

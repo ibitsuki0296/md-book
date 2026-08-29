@@ -1,0 +1,39 @@
+/*
+ * "ink" — a warm, high-contrast reading theme with a serif body and a
+ * green accent. Demonstrates a full light + dark token override.
+ */
+
+:root {
+  --md-book-color-bg: #fbfaf7;
+  --md-book-color-fg: #1f1d1a;
+  --md-book-color-fg-muted: #6a655c;
+  --md-book-color-surface: #f2efe8;
+  --md-book-color-surface-hover: #e8e3d8;
+  --md-book-color-border: #ddd6c7;
+  --md-book-color-accent: #1f7a4d;
+  --md-book-color-accent-hover: #155f3b;
+  --md-book-color-accent-fg: #fbfaf7;
+  --md-book-color-inline-code-bg: color-mix(in srgb, #1f7a4d 12%, transparent);
+  --md-book-color-code-bg: #f2efe8;
+  --md-book-color-code-fg: #1f1d1a;
+
+  --md-book-font-body: Georgia, "Iowan Old Style", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --md-book-font-heading: var(--md-book-font-body);
+  --md-book-leading: 1.75;
+  --md-book-measure: 42rem;
+  --md-book-radius: 0.25rem;
+}
+
+:root[data-theme="dark"] {
+  --md-book-color-bg: #1a1916;
+  --md-book-color-fg: #ece7dc;
+  --md-book-color-fg-muted: #a49d8c;
+  --md-book-color-surface: #232019;
+  --md-book-color-surface-hover: #2e2a21;
+  --md-book-color-border: #3b362b;
+  --md-book-color-accent: #5cc48c;
+  --md-book-color-accent-hover: #7ad3a4;
+  --md-book-color-accent-fg: #1a1916;
+  --md-book-color-code-bg: #232019;
+  --md-book-color-code-fg: #ece7dc;
+}

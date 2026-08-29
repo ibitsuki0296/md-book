@@ -17,6 +17,7 @@ import {
 } from './enhance.js';
 import { PageLoader, PageNotFoundError } from './page.js';
 import { type Router, type RouterMode, createRouter } from './router.js';
+import { type ThemeController, type ThemeMode, createThemeController } from './theme.js';
 
 export interface MountOptions {
   /** A ready manifest object. Provide this or `manifestUrl`. */
@@ -32,6 +33,12 @@ export interface MountOptions {
   routerMode?: RouterMode;
   /** Optional syntax highlighter run over code blocks after each render. */
   highlight?: Highlighter;
+  /** Theme behaviour. `toggle` (default `true`) adds a light/dark button to the header. */
+  theme?: {
+    default?: ThemeMode;
+    storageKey?: string;
+    toggle?: boolean;
+  };
   slots?: Partial<Record<'navbarEnd' | 'sidebarTop' | 'pageFooter', SlotContent>>;
   /** Test / transport overrides. */
   fetchText?: (url: string) => Promise<string>;
@@ -40,6 +47,7 @@ export interface MountOptions {
 
 export interface MountHandle {
   readonly element: HTMLElement;
+  readonly theme: ThemeController;
   navigate: (to: string, options?: { replace?: boolean }) => void;
   destroy: () => void;
 }
@@ -89,6 +97,15 @@ export async function mount(
 
   const app = createApp(host, { site, router, slots: options.slots });
   app.renderNav(buildNav(manifest.entries));
+
+  const theme = createThemeController({
+    default: options.theme?.default,
+    storageKey: options.theme?.storageKey,
+  });
+  let themeCleanup: (() => void) | undefined;
+  if (options.theme?.toggle !== false) {
+    themeCleanup = mountThemeToggle(app.navbarEnd, theme);
+  }
 
   attachPrefetch(app.root, router, loader);
 
@@ -142,12 +159,42 @@ export async function mount(
 
   return {
     element: app.root,
+    theme,
     navigate: router.navigate,
     destroy: () => {
       scrollSpy?.disconnect();
+      themeCleanup?.();
+      theme.destroy();
       router.stop();
       host.replaceChildren();
     },
+  };
+}
+
+/** Adds a light/dark toggle button to the header and keeps its label in sync. */
+function mountThemeToggle(navbarEnd: HTMLElement, theme: ThemeController): () => void {
+  navbarEnd.hidden = false;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'md-book-theme-toggle';
+
+  const sync = () => {
+    const dark = theme.resolved() === 'dark';
+    button.textContent = dark ? '☀' : '☾';
+    button.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    button.setAttribute('aria-pressed', String(dark));
+  };
+  sync();
+
+  const onClick = () => theme.toggle();
+  button.addEventListener('click', onClick);
+  const unsubscribe = theme.subscribe(sync);
+
+  navbarEnd.append(button);
+  return () => {
+    button.removeEventListener('click', onClick);
+    unsubscribe();
+    button.remove();
   };
 }
 

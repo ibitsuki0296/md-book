@@ -29,6 +29,8 @@ export interface App {
   readonly root: HTMLElement;
   readonly content: HTMLElement;
   readonly article: HTMLElement;
+  /** The header's trailing region — mount appends the theme toggle here. */
+  readonly navbarEnd: HTMLElement;
   renderNav(nav: NavItem[]): void;
   renderPage(state: PageState): void;
   renderMessage(title: string, body: string): void;
@@ -116,6 +118,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     root,
     content,
     article,
+    navbarEnd,
     renderNav,
     renderPage,
     renderMessage,

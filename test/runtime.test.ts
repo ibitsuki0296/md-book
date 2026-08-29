@@ -191,6 +191,33 @@ describe('mount', () => {
     handle.destroy();
   });
 
+  it('adds a working theme toggle to the header', async () => {
+    localStorage.clear();
+    document.documentElement.removeAttribute('data-theme');
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, { manifest: makeManifest(), fetchText });
+
+    const toggle = host.querySelector<HTMLButtonElement>('.md-book-theme-toggle');
+    expect(toggle).toBeTruthy();
+    toggle!.click();
+    expect(['light', 'dark']).toContain(document.documentElement.getAttribute('data-theme'));
+    expect(handle.theme.get()).toBe(document.documentElement.getAttribute('data-theme'));
+    handle.destroy();
+  });
+
+  it('omits the toggle when theme.toggle is false', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, {
+      manifest: makeManifest(),
+      fetchText,
+      theme: { toggle: false },
+    });
+    expect(host.querySelector('.md-book-theme-toggle')).toBeNull();
+    handle.destroy();
+  });
+
   it('shows a not-found message for an unregistered route', async () => {
     const host = document.createElement('div');
     document.body.append(host);

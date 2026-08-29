@@ -7,8 +7,18 @@ import { version } from '../version.js';
 import { MdBookElement, defineElement } from './element.js';
 import { mount } from './mount.js';
 import { createRouter } from './router.js';
+import { createThemeController, themeInitScript } from './theme.js';
 
-export { mount, createRouter, renderMarkdown, defineElement, MdBookElement, version };
+export {
+  mount,
+  createRouter,
+  createThemeController,
+  themeInitScript,
+  renderMarkdown,
+  defineElement,
+  MdBookElement,
+  version,
+};
 
 if (typeof window !== 'undefined') {
   defineElement();

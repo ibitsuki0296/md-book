@@ -41,14 +41,15 @@
   "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": ["*.css"],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/build-css.mjs",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "example": "npm run build && cp dist/md-book.global.js examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --port 4173"
+    "validate:tokens": "node scripts/validate-tokens.mjs",
+    "example": "npm run build && cp dist/md-book.global.js dist/style.css examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --port 4173"
   },
   "dependencies": {
     "github-slugger": "^2.0.0",

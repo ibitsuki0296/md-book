@@ -1,0 +1,122 @@
+/*
+ * md-book design tokens — the public theming API.
+ *
+ * A theme is a stylesheet that redefines these `--md-book-*` custom properties.
+ * Everything the runtime renders is styled through them, so overriding a token
+ * restyles the whole site. Renaming a token is a breaking change.
+ *
+ * Layers: primitives (raw palette) -> semantic tokens. Override either level.
+ * Dark mode is applied when the OS prefers dark AND the user has not forced
+ * light, or when `data-theme="dark"` is set on <html>.
+ */
+
+@layer md-book.tokens {
+  :root {
+    /* --- primitives: raw palette ------------------------------------- */
+    --md-book-gray-0: #ffffff;
+    --md-book-gray-50: #f7f8fa;
+    --md-book-gray-100: #eceef2;
+    --md-book-gray-200: #dde0e7;
+    --md-book-gray-300: #c3c8d2;
+    --md-book-gray-400: #9aa1af;
+    --md-book-gray-500: #6b7280;
+    --md-book-gray-600: #4b5160;
+    --md-book-gray-700: #363b48;
+    --md-book-gray-800: #23272f;
+    --md-book-gray-900: #14161b;
+    --md-book-gray-950: #0c0d11;
+
+    --md-book-brand-400: #6ea8fe;
+    --md-book-brand-500: #3b82f6;
+    --md-book-brand-600: #2563eb;
+    --md-book-brand-700: #1d4ed8;
+
+    --md-book-blue-500: #3b82f6;
+    --md-book-green-500: #16a34a;
+    --md-book-amber-500: #d97706;
+    --md-book-red-500: #dc2626;
+
+    /* --- semantic tokens ------------------------------------------------ */
+    --md-book-color-bg: var(--md-book-gray-0);
+    --md-book-color-fg: var(--md-book-gray-800);
+    --md-book-color-fg-muted: var(--md-book-gray-500);
+    --md-book-color-surface: var(--md-book-gray-50);
+    --md-book-color-surface-hover: var(--md-book-gray-100);
+    --md-book-color-border: var(--md-book-gray-200);
+    --md-book-color-accent: var(--md-book-brand-600);
+    --md-book-color-accent-hover: var(--md-book-brand-700);
+    --md-book-color-accent-fg: var(--md-book-gray-0);
+    --md-book-color-accent-muted: color-mix(in srgb, var(--md-book-brand-600) 12%, transparent);
+    --md-book-color-code-bg: var(--md-book-gray-100);
+    --md-book-color-code-fg: var(--md-book-gray-800);
+    --md-book-color-inline-code-bg: color-mix(in srgb, var(--md-book-brand-600) 10%, transparent);
+    --md-book-color-selection: color-mix(in srgb, var(--md-book-brand-500) 28%, transparent);
+
+    --md-book-color-note: var(--md-book-blue-500);
+    --md-book-color-tip: var(--md-book-green-500);
+    --md-book-color-warning: var(--md-book-amber-500);
+    --md-book-color-danger: var(--md-book-red-500);
+    --md-book-admonition-bg-mix: 8%;
+
+    /* --- typography --------------------------------------------------- */
+    --md-book-font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    --md-book-font-heading: var(--md-book-font-body);
+    --md-book-font-mono: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas",
+      "Liberation Mono", monospace;
+    --md-book-text-base: 1rem;
+    --md-book-text-scale: 1.2;
+    --md-book-leading: 1.7;
+    --md-book-leading-heading: 1.25;
+
+    /* --- layout & shape -------------------------------------------------- */
+    --md-book-measure: 46rem;
+    --md-book-content-max: 90rem;
+    --md-book-sidebar-width: 16rem;
+    --md-book-toc-width: 14rem;
+    --md-book-header-height: 3.5rem;
+    --md-book-gutter: 2rem;
+    --md-book-radius: 0.5rem;
+    --md-book-radius-sm: 0.25rem;
+    --md-book-border-width: 1px;
+    --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.06);
+    --md-book-transition: 150ms ease;
+    --md-book-focus-ring: 2px solid var(--md-book-color-accent);
+  }
+
+  /* Dark palette: OS-preferred and not force-light. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --md-book-color-bg: var(--md-book-gray-950);
+      --md-book-color-fg: var(--md-book-gray-100);
+      --md-book-color-fg-muted: var(--md-book-gray-400);
+      --md-book-color-surface: var(--md-book-gray-900);
+      --md-book-color-surface-hover: var(--md-book-gray-800);
+      --md-book-color-border: var(--md-book-gray-700);
+      --md-book-color-accent: var(--md-book-brand-400);
+      --md-book-color-accent-hover: #9dc2ff;
+      --md-book-color-accent-fg: var(--md-book-gray-950);
+      --md-book-color-code-bg: var(--md-book-gray-900);
+      --md-book-color-code-fg: var(--md-book-gray-100);
+      --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.45);
+      --md-book-admonition-bg-mix: 16%;
+    }
+  }
+
+  /* Explicit override always wins, both directions. */
+  :root[data-theme="dark"] {
+    --md-book-color-bg: var(--md-book-gray-950);
+    --md-book-color-fg: var(--md-book-gray-100);
+    --md-book-color-fg-muted: var(--md-book-gray-400);
+    --md-book-color-surface: var(--md-book-gray-900);
+    --md-book-color-surface-hover: var(--md-book-gray-800);
+    --md-book-color-border: var(--md-book-gray-700);
+    --md-book-color-accent: var(--md-book-brand-400);
+    --md-book-color-accent-hover: #9dc2ff;
+    --md-book-color-accent-fg: var(--md-book-gray-950);
+    --md-book-color-code-bg: var(--md-book-gray-900);
+    --md-book-color-code-fg: var(--md-book-gray-100);
+    --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.45);
+    --md-book-admonition-bg-mix: 16%;
+  }
+}

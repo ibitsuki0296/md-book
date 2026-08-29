@@ -1,0 +1,98 @@
+@layer md-book.layout {
+  .md-book-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: var(--md-book-gutter);
+    height: var(--md-book-header-height);
+    padding-inline: var(--md-book-gutter);
+    background: color-mix(in srgb, var(--md-book-color-bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: var(--md-book-border-width) solid var(--md-book-color-border);
+  }
+
+  .md-book-brand {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--md-book-color-fg);
+  }
+
+  .md-book-nav {
+    display: flex;
+    gap: 1.25rem;
+    flex: 1;
+  }
+
+  .md-book-navbar-end {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .md-book-body {
+    display: grid;
+    grid-template-columns: var(--md-book-sidebar-width) minmax(0, 1fr) var(--md-book-toc-width);
+    gap: var(--md-book-gutter);
+    max-width: var(--md-book-content-max);
+    margin-inline: auto;
+    padding: var(--md-book-gutter);
+  }
+
+  .md-book-sidebar {
+    position: sticky;
+    top: calc(var(--md-book-header-height) + var(--md-book-gutter));
+    align-self: start;
+    max-height: calc(100vh - var(--md-book-header-height) - var(--md-book-gutter) * 2);
+    overflow-y: auto;
+    font-size: 0.925rem;
+  }
+
+  .md-book-main {
+    min-width: 0;
+    max-width: var(--md-book-measure);
+  }
+
+  .md-book-main:focus {
+    outline: none;
+  }
+
+  .md-book-toc {
+    position: sticky;
+    top: calc(var(--md-book-header-height) + var(--md-book-gutter));
+    align-self: start;
+    max-height: calc(100vh - var(--md-book-header-height) - var(--md-book-gutter) * 2);
+    overflow-y: auto;
+    font-size: 0.85rem;
+  }
+
+  .md-book-toc[hidden] {
+    display: none;
+  }
+
+  /* Tablet: drop the TOC rail. */
+  @media (max-width: 1100px) {
+    .md-book-body {
+      grid-template-columns: var(--md-book-sidebar-width) minmax(0, 1fr);
+    }
+    .md-book-toc {
+      display: none;
+    }
+  }
+
+  /* Mobile: single column, sidebar becomes a disclosure. */
+  @media (max-width: 760px) {
+    .md-book-body {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 1rem;
+    }
+    .md-book-sidebar {
+      position: static;
+      max-height: none;
+      border-bottom: var(--md-book-border-width) solid var(--md-book-color-border);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+  }
+}
