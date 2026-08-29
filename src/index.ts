@@ -5,6 +5,27 @@
  * functions; nothing exported here touches the DOM or the filesystem.
  */
 
+export {
+  assertManifest,
+  buildNav,
+  buildSidebar,
+  entryTitle,
+  fileToRoutePath,
+  flattenPages,
+  getPrevNext,
+  makeEntry,
+  MANIFEST_VERSION,
+  orderFromFilename,
+  resolveRoutes,
+} from './core/content.js';
+export type {
+  Manifest,
+  ManifestEntry,
+  NavItem,
+  PrevNext,
+  RouteNode,
+  SidebarOptions,
+} from './core/content.js';
 export { createMarkdown } from './core/markdown/index.js';
 export type { MarkdownConfig } from './core/markdown/index.js';
 export { buildToc } from './core/markdown/plugins/anchor-toc.js';
@@ -16,5 +37,4 @@ export type {
   RenderResult,
   TocEntry,
 } from './core/types.js';
-
-export const version = '0.0.0';
+export { version } from './version.js';
