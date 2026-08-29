@@ -23,6 +23,9 @@ export interface Manifest {
   base: string;
   /** Optional URL prefix the runtime prepends when fetching raw `.md` files. */
   contentBase?: string;
+  /** Optional site title / description, surfaced by the runtime for `<title>` and meta. */
+  title?: string;
+  description?: string;
   entries: ManifestEntry[];
   /** ISO timestamp of generation. */
   generatedAt: string;

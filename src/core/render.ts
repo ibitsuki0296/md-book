@@ -1,4 +1,4 @@
-import matter from 'gray-matter';
+import { parseFrontMatter } from './frontmatter.js';
 import { createMarkdown } from './markdown/index.js';
 import type { AnchorTocEnv } from './markdown/plugins/anchor-toc.js';
 import { buildToc } from './markdown/plugins/anchor-toc.js';
@@ -12,8 +12,8 @@ const DEFAULT_EXCERPT_LENGTH = 200;
  * structured metadata the runtime and SSG layers need. Pure and DOM-free.
  */
 export function renderMarkdown(source: string, options: RenderOptions = {}): RenderResult {
-  const parsed = matter(source);
-  const frontMatter = (parsed.data ?? {}) as FrontMatter;
+  const parsed = parseFrontMatter(source);
+  const frontMatter = parsed.data as FrontMatter;
   const body = parsed.content;
 
   const md = createMarkdown({

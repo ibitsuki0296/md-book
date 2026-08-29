@@ -1,9 +1,9 @@
 import { defineConfig } from 'tsup';
 
-// Entry points grow as milestones land (runtime UI, CDN global build).
 export default defineConfig([
+  // Library entries: core + runtime (ESM + CJS + d.ts).
   {
-    entry: { index: 'src/index.ts' },
+    entry: { index: 'src/index.ts', runtime: 'src/runtime/index.ts' },
     format: ['esm', 'cjs'],
     dts: true,
     sourcemap: true,
@@ -14,6 +14,7 @@ export default defineConfig([
       return { js: format === 'cjs' ? '.cjs' : '.mjs' };
     },
   },
+  // CLI: Node-only, single ESM file with a shebang.
   {
     entry: { cli: 'src/cli/index.ts' },
     format: ['esm'],
@@ -24,6 +25,20 @@ export default defineConfig([
     banner: { js: '#!/usr/bin/env node' },
     outExtension() {
       return { js: '.mjs' };
+    },
+  },
+  // CDN: one minified IIFE, everything bundled, exposes `window.MdBook`.
+  {
+    entry: { 'md-book.global': 'src/runtime/global.ts' },
+    format: ['iife'],
+    globalName: 'MdBook',
+    minify: true,
+    sourcemap: true,
+    target: 'es2020',
+    platform: 'browser',
+    noExternal: [/.*/],
+    outExtension() {
+      return { js: '.js' };
     },
   },
 ]);

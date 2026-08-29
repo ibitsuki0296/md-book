@@ -13,6 +13,8 @@ manifest options:
   --out <file>          Output path (default: <contentDir>/manifest.json)
   --base <path>         Site base path baked into routes (default: /)
   --content-base <url>  URL prefix the runtime uses to fetch raw .md
+  --title <text>        Site title stored in the manifest
+  --description <text>  Site description stored in the manifest
   --drafts             Include pages with front matter draft: true
 
 dev options:
@@ -58,6 +60,8 @@ async function runManifest(args: string[]): Promise<number> {
       out: { type: 'string' },
       base: { type: 'string' },
       'content-base': { type: 'string' },
+      title: { type: 'string' },
+      description: { type: 'string' },
       drafts: { type: 'boolean', default: false },
     },
   });
@@ -74,6 +78,8 @@ async function runManifest(args: string[]): Promise<number> {
     out,
     base: values.base,
     contentBase: values['content-base'],
+    title: values.title,
+    description: values.description,
     includeDrafts: values.drafts,
   });
   process.stdout.write(`md-book: wrote ${written} (${manifest.entries.length} pages)\n`);

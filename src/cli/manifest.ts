@@ -1,7 +1,7 @@
 import { type Dirent, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
-import matter from 'gray-matter';
 import { MANIFEST_VERSION, type Manifest, type ManifestEntry, makeEntry } from '../core/content.js';
+import { parseFrontMatter } from '../core/frontmatter.js';
 import type { FrontMatter } from '../core/types.js';
 
 export interface GenerateManifestOptions {
@@ -11,6 +11,9 @@ export interface GenerateManifestOptions {
   base?: string;
   /** URL prefix the runtime prepends when fetching raw `.md`. */
   contentBase?: string;
+  /** Site title / description baked into the manifest for the runtime. */
+  title?: string;
+  description?: string;
   /** Include files whose front matter has `draft: true`. Default `false`. */
   includeDrafts?: boolean;
   /** Directory / file names to skip entirely. */
@@ -30,8 +33,7 @@ export function generateManifest(options: GenerateManifestOptions): Manifest {
   for (const file of files) {
     const abs = join(options.contentDir, file);
     const raw = readFileSync(abs, 'utf8');
-    const parsed = matter(raw);
-    const frontMatter = (parsed.data ?? {}) as FrontMatter;
+    const frontMatter = parseFrontMatter(raw).data as FrontMatter;
     if (frontMatter.draft === true && !options.includeDrafts) continue;
     const mtime = safeMtime(abs);
     entries.push(makeEntry(toPosix(file), frontMatter, base, mtime));
@@ -46,6 +48,8 @@ export function generateManifest(options: GenerateManifestOptions): Manifest {
     generatedAt: new Date().toISOString(),
   };
   if (options.contentBase) manifest.contentBase = options.contentBase;
+  if (options.title) manifest.title = options.title;
+  if (options.description) manifest.description = options.description;
   return manifest;
 }
 

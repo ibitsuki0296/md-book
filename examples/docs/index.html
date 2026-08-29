@@ -4,14 +4,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>md-book example</title>
-    <!-- The runtime bundle + stylesheet are wired up in milestone M3. -->
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; }
+      .md-book-header { display: flex; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid #ddd; align-items: baseline; }
+      .md-book-brand { font-weight: 700; text-decoration: none; color: inherit; }
+      .md-book-nav { display: flex; gap: 0.75rem; }
+      .md-book-body { display: grid; grid-template-columns: 15rem minmax(0, 1fr) 12rem; gap: 1.5rem; padding: 1.5rem; }
+      .md-book-sidebar__list { list-style: none; padding-left: 0.75rem; margin: 0.25rem 0; }
+      .md-book-main { min-width: 0; }
+      .md-book-toc__list { list-style: none; padding-left: 0.75rem; }
+      .md-book-toc__link.is-active { font-weight: 700; }
+      .md-book-pager { display: flex; justify-content: space-between; margin-top: 2rem; }
+      .md-book-code { position: relative; }
+      .md-book-code__copy { position: absolute; top: 0.25rem; right: 0.25rem; }
+      a.is-active { font-weight: 700; }
+    </style>
+    <!-- Full token-based theming lands in milestone M4; the above is a stopgap. -->
   </head>
   <body>
-    <div id="app">
-      <p>
-        This page is a placeholder. Run <code>md-book dev</code> and open
-        <a href="/manifest.json">/manifest.json</a> to see the content model output.
-      </p>
-    </div>
+    <md-book manifest="/manifest.json" base="/" router="history"></md-book>
+    <script src="/md-book.global.js"></script>
   </body>
 </html>

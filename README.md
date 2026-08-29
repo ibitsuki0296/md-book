@@ -66,6 +66,37 @@ Pure helpers for laying out a site: `resolveRoutes` (flat entries → route tree
 `buildNav`, `buildSidebar` (section-scoped, draft-aware), `flattenPages` +
 `getPrevNext`, and `assertManifest` for validating a fetched manifest.
 
+## Browser runtime (implemented now)
+
+The runtime renders a full site in the browser from a manifest — no build step.
+
+```html
+<md-book manifest="/manifest.json" base="/" router="history"></md-book>
+<script src="https://cdn.example/@md-book/core/md-book.global.js"></script>
+```
+
+or programmatically:
+
+```ts
+import { mount } from '@md-book/core/runtime';
+
+const site = await mount('#app', { manifestUrl: '/manifest.json' });
+site.navigate('/guide/getting-started');
+```
+
+It builds the shell (skip link, header nav, sidebar, content, TOC rail, prev/next
+pager, footer), runs a History-API (or `hash`) client router that intercepts
+internal links and prefetches on hover, fetches + renders each page through the
+core, adds copy buttons to code blocks, tracks the active heading for the TOC,
+and keeps `<title>` / `meta[description]` in sync. Pass `highlight: (code, lang)
+=> html` to plug in a syntax highlighter.
+
+Run the example site (`examples/docs/`):
+
+```bash
+npm run example   # build + serve at http://localhost:4173
+```
+
 ## Development
 
 ```bash
@@ -88,7 +119,7 @@ for the full requirements doc. Milestones:
 |---|---|
 | **M1 core** *(done)* | Markdown pipeline, front matter, TOC, link rewrite, containers |
 | **M2 content model** *(done)* | Manifest type + validation, route resolution, nav/sidebar, prev/next, `md-book manifest` + `md-book dev` |
-| M3 | Runtime UI: `<md-book>` element / `mount()`, client router, layout, scroll-spy, code copy |
+| **M3 runtime UI** *(done)* | `<md-book>` element + `mount()`, client router, app shell, page loader/cache, scroll-spy, code copy, CDN global build |
 | M4 | Theming: token CSS + `@layer`, light/dark, `setTheme`, FOUC guard, token validator |
 | M5 | Blog: post collection, pagination, tag/category pages, RSS/Atom/JSON feed |
 | M6 | a11y, size budget, SEO meta, demo site, docs, distribution (ESM/CJS/UMD/CSS), first release |

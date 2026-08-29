@@ -34,10 +34,18 @@ describe('startDevServer', () => {
 
     const manifest = await (await fetch(`${origin}/manifest.json`)).json();
     expect(manifest.entries.map((e: { path: string }) => e.path)).toEqual(['/', '/guide/intro']);
+    expect(manifest.contentBase).toBe('/@content');
 
     const css = await fetch(`${origin}/app.css`);
     expect(css.headers.get('content-type')).toContain('text/css');
     expect(await css.text()).toContain('color:red');
+
+    const raw = await fetch(`${origin}/@content/guide/intro.md`);
+    expect(raw.headers.get('content-type')).toContain('text/markdown');
+    expect(await raw.text()).toContain('title: Intro');
+
+    const missing = await fetch(`${origin}/@content/guide/nope.md`);
+    expect(missing.status).toBe(404);
 
     const spa = await fetch(`${origin}/guide/intro`);
     const html = await spa.text();

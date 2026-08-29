@@ -47,18 +47,21 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "example": "npm run build && cp dist/md-book.global.js examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --port 4173"
   },
   "dependencies": {
     "github-slugger": "^2.0.0",
-    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.3.2",
     "markdown-it": "^14.1.0",
     "markdown-it-footnote": "^4.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/js-yaml": "^4.0.9",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.10.2",
+    "happy-dom": "^20.11.15",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.2.7"

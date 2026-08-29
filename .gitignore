@@ -7,3 +7,7 @@ coverage/
 .env.*
 examples/**/manifest.json
 examples/**/feed.xml
+
+# example smoke artifacts
+examples/**/md-book.global.js
+examples/**/md-book.global.js.map
