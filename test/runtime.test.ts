@@ -314,6 +314,84 @@ describe('mount with blog', () => {
   });
 });
 
+describe('mount SEO head', () => {
+  const seoFetch = vi.fn(async (url: string) => {
+    if (url.endsWith('/blog/2026-02-01-hello.md'))
+      return '---\ntitle: Hello\ndate: 2026-02-01\nauthor: Ada\ntags: [news]\n---\npost body';
+    return FILES['guide/01-getting-started.md']!;
+  });
+
+  const seoManifest = (): Manifest => ({
+    version: MANIFEST_VERSION,
+    base: '/',
+    title: 'Docs',
+    generatedAt: '2026-01-01T00:00:00.000Z',
+    entries: [
+      makeEntry('guide/01-getting-started.md', { title: 'Getting Started' }),
+      makeEntry('blog/2026-02-01-hello.md', { title: 'Hello', date: '2026-02-01' }),
+    ],
+  });
+
+  beforeEach(() => {
+    for (const el of document.head.querySelectorAll('[data-md-book-head]')) el.remove();
+  });
+
+  it('writes canonical, Open Graph and Twitter meta for a page', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, {
+      manifest: seoManifest(),
+      fetchText: seoFetch,
+      seo: { siteUrl: 'https://example.com/', siteName: 'Docs', twitterSite: '@docs' },
+    });
+    handle.navigate('/guide/getting-started');
+    await new Promise((r) => setTimeout(r, 0));
+
+    const meta = (sel: string) =>
+      document.head.querySelector(sel)?.getAttribute('content') ??
+      document.head.querySelector(sel)?.getAttribute('href');
+
+    expect(meta('link[rel="canonical"]')).toBe('https://example.com/guide/getting-started');
+    expect(meta('meta[property="og:title"]')).toBe('Getting Started — Docs');
+    expect(meta('meta[property="og:type"]')).toBe('website');
+    expect(meta('meta[property="og:site_name"]')).toBe('Docs');
+    expect(meta('meta[name="twitter:card"]')).toBe('summary');
+    expect(meta('meta[name="twitter:site"]')).toBe('@docs');
+    handle.destroy();
+  });
+
+  it('marks blog posts as articles with JSON-LD, and cleans up on leaving', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, {
+      manifest: seoManifest(),
+      fetchText: seoFetch,
+      blog: true,
+      seo: { siteUrl: 'https://example.com/' },
+    });
+
+    handle.navigate('/blog/hello');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(document.head.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe(
+      'article',
+    );
+    const ld = document.head.querySelector('script[type="application/ld+json"]');
+    expect(ld).toBeTruthy();
+    expect(JSON.parse(ld!.textContent!)).toMatchObject({
+      '@type': 'BlogPosting',
+      headline: 'Hello — Docs',
+      datePublished: '2026-02-01T00:00:00.000Z',
+      author: { name: 'Ada' },
+    });
+
+    handle.navigate('/guide/getting-started');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(document.head.querySelector('script[type="application/ld+json"]')).toBeNull();
+    expect(document.head.querySelector('meta[property="article:tag"]')).toBeNull();
+    handle.destroy();
+  });
+});
+
 describe('defineElement', () => {
   it('registers <md-book> once and exposes observed attributes', () => {
     defineElement();

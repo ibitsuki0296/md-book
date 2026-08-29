@@ -12,6 +12,7 @@ export {
   type Highlighter,
   type ScrollSpy,
 } from './enhance.js';
+export { applyHead, type HeadInput, type SeoConfig } from './head.js';
 export { mount, type MountHandle, type MountOptions } from './mount.js';
 export { PageLoader, PageNotFoundError } from './page.js';
 export { createRouter, type Router, type RouterMode } from './router.js';

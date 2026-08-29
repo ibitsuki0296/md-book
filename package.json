@@ -1,10 +1,18 @@
 {
   "name": "@md-book/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Runtime-first Markdown documentation & blog site library with token-based theming",
   "type": "module",
   "license": "MIT",
   "author": "Hazuki Abe",
+  "homepage": "https://github.com/hazuki/md-book#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hazuki/md-book.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hazuki/md-book/issues"
+  },
   "keywords": [
     "markdown",
     "documentation",
@@ -18,6 +26,9 @@
     "node": ">=20"
   },
   "packageManager": "npm@11.9.0",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "bin": {
     "md-book": "./dist/cli.mjs"
   },
@@ -29,7 +40,8 @@
     },
     "./runtime": {
       "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.mjs"
+      "import": "./dist/runtime.mjs",
+      "require": "./dist/runtime.cjs"
     },
     "./cli": {
       "types": "./dist/cli.d.ts",
@@ -41,7 +53,7 @@
   "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": ["*.css"],
   "scripts": {
-    "build": "tsup && node scripts/build-css.mjs",
+    "build": "tsup && node scripts/postbuild.mjs",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -49,6 +61,9 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "validate:tokens": "node scripts/validate-tokens.mjs",
+    "size": "size-limit",
+    "release": "npm run build && changeset publish",
+    "prepare": "lefthook install || true",
     "example": "npm run build && cp dist/md-book.global.js dist/style.css examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --port 4173"
   },
   "dependencies": {
@@ -59,10 +74,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.11",
+    "@size-limit/file": "^11.1.6",
     "@types/js-yaml": "^4.0.9",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.10.2",
     "happy-dom": "^20.11.15",
+    "lefthook": "^1.10.1",
+    "size-limit": "^11.1.6",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.2.7"

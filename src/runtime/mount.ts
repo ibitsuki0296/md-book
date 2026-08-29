@@ -16,6 +16,7 @@ import {
   applyHighlight,
   createScrollSpy,
 } from './enhance.js';
+import { type SeoConfig, applyHead } from './head.js';
 import { PageLoader, PageNotFoundError } from './page.js';
 import { type Router, type RouterMode, createRouter } from './router.js';
 import { type ThemeController, type ThemeMode, createThemeController } from './theme.js';
@@ -45,6 +46,8 @@ export interface MountOptions {
    * defaults (`blog/`, 10 per page, `/tags`, `/categories`) or an override.
    */
   blog?: boolean | Partial<BlogRuntimeConfig>;
+  /** Social / canonical / JSON-LD metadata written to `<head>` on navigation. */
+  seo?: SeoConfig;
   slots?: Partial<Record<'navbarEnd' | 'sidebarTop' | 'pageFooter', SlotContent>>;
   /** Test / transport overrides. */
   fetchText?: (url: string) => Promise<string>;
@@ -86,6 +89,7 @@ export async function mount(
     (rootEntry ? entryTitle(rootEntry) : manifest.entries[0]?.frontMatter.title) ??
     'Documentation';
   const site = { title: rootTitle, description: options.description ?? manifest.description };
+  const seo: SeoConfig = { siteName: rootTitle, ...options.seo };
 
   let scrollSpy: ScrollSpy | null = null;
   let renderToken = 0;
@@ -146,8 +150,15 @@ export async function mount(
           prevNext: {},
         });
         addCodeCopyButtons(app.article);
-        document.title = `${view.title} — ${site.title}`;
-        setMeta('description', site.description || '');
+        applyHead(
+          {
+            title: `${view.title} — ${site.title}`,
+            description: site.description || '',
+            routePath: path,
+            type: 'website',
+          },
+          seo,
+        );
         scrollSpy?.disconnect();
         scrollSpy = null;
         app.setActiveHeading(null);
@@ -181,8 +192,26 @@ export async function mount(
       addCodeCopyButtons(app.article);
       if (options.highlight) await applyHighlight(app.article, options.highlight);
 
-      document.title = `${page.frontMatter.title ?? entryTitle(page.entry)} — ${site.title}`;
-      setMeta('description', page.excerpt || site.description || '');
+      const pageTitle = page.frontMatter.title ?? entryTitle(page.entry);
+      const isArticle = Boolean(
+        blogConfig && resolved.startsWith(`/${blogConfig.dir}/`) && page.frontMatter.date,
+      );
+      applyHead(
+        {
+          title: `${pageTitle} — ${site.title}`,
+          description: page.excerpt || site.description || '',
+          routePath: resolved,
+          type: isArticle ? 'article' : 'website',
+          image: typeof page.frontMatter.cover === 'string' ? page.frontMatter.cover : undefined,
+          publishedTime: isoOrUndefined(page.frontMatter.date),
+          modifiedTime: isoOrUndefined(page.frontMatter.updated),
+          author: typeof page.frontMatter.author === 'string' ? page.frontMatter.author : undefined,
+          tags: Array.isArray(page.frontMatter.tags)
+            ? page.frontMatter.tags.filter((t): t is string => typeof t === 'string')
+            : undefined,
+        },
+        seo,
+      );
 
       scrollSpy?.disconnect();
       scrollSpy = createScrollSpy({
@@ -309,14 +338,13 @@ async function loadManifest(
   return (await res.json()) as Manifest;
 }
 
-function setMeta(name: string, content: string): void {
-  let tag = document.head.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
-  if (!tag) {
-    tag = document.createElement('meta');
-    tag.name = name;
-    document.head.append(tag);
+function isoOrUndefined(value: unknown): string | undefined {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value.toISOString();
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
   }
-  tag.content = content;
+  return undefined;
 }
 
 function cssEscape(value: string): string {

@@ -7,9 +7,9 @@ site in the browser — no build step required. A static-site (SSG) mode and
 framework adapters come later; the core is deliberately pure so both layers can
 share it.
 
-> **Status: early development.** The `core` rendering layer (this milestone) is
-> implemented and tested. Runtime UI, theming, blog features, and the CLI are on
-> the roadmap below.
+> **Status: 0.1.0.** Core rendering, the content model + CLI, the browser
+> runtime, token theming, blog, and SEO metadata are implemented and tested
+> (114 tests). Next: a static-build (SSG) mode and framework adapters.
 
 ## Why "md-book"
 
@@ -148,14 +148,24 @@ npx md-book feed ./content --site-url https://example.com/ --title "My blog"
 
 ```bash
 npm install
-npm test          # vitest
-npm run typecheck # tsc --noEmit
-npm run build     # tsup -> dist/ (ESM + CJS + d.ts + CLI)
-npm run lint      # biome
+npm test              # vitest
+npm run typecheck     # tsc --noEmit
+npm run build         # tsup -> dist/ (ESM + CJS + d.ts + CLI + CSS) + SRI hash
+npm run lint          # biome
+npm run size          # size-limit (CDN bundle budget)
+npm run validate:tokens
+npm run example       # build + serve examples/docs at :4173
 ```
 
-The example site under `examples/docs/` is the fixture for the dev server and
-integration tests.
+`examples/docs/` is both the dev-server fixture and the documentation site
+(md-book dogfooding itself).
+
+Releases are driven by [Changesets](https://github.com/changesets/changesets):
+`npx changeset` to note a change, then CI runs `npm run release` (build +
+`changeset publish` with npm provenance) on merge to `main`. `pre-commit` runs
+Biome + typecheck via lefthook; CI additionally runs tests, build, size, and the
+token validator. `dist/md-book.global.js.sri` holds the Subresource Integrity
+hash for the CDN `<script>`.
 
 ## Roadmap
 
@@ -169,7 +179,8 @@ for the full requirements doc. Milestones:
 | **M3 runtime UI** *(done)* | `<md-book>` element + `mount()`, client router, app shell, page loader/cache, scroll-spy, code copy, CDN global build |
 | **M4 theming** *(done)* | `--md-book-*` token contract, `@layer` stylesheet, light/dark, theme controller + FOUC guard + header toggle, reference themes, token validator |
 | **M5 blog** *(done)* | `collectPosts` + date sort, `paginate`, tag/category grouping, list / pagination / taxonomy routes in the runtime, `generateFeed` (RSS/Atom/JSON) + `md-book feed` |
-| M6 | a11y, size budget, SEO meta, demo site, docs, distribution (ESM/CJS/UMD/CSS), first release |
+| **M6 hardening** *(done)* | SEO head (canonical / OG / Twitter / Article JSON-LD), a11y structure + tests, `size-limit`, SRI hash, GitHub Actions CI, lefthook, Changesets, docs content, `0.1.0` |
+| next | Static-build (SSG) mode; Astro / Vite / Next adapters; client-side search; Mermaid / KaTeX; i18n |
 
 ## License
 
