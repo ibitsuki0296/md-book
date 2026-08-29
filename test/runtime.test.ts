@@ -230,6 +230,90 @@ describe('mount', () => {
   });
 });
 
+describe('mount with blog', () => {
+  function blogManifest(): Manifest {
+    const dated = ['2026-05-01', '2026-04-01', '2026-03-01', '2026-02-01', '2026-01-01'];
+    return {
+      version: MANIFEST_VERSION,
+      base: '/',
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      entries: [
+        makeEntry('index.md', { title: 'Home' }),
+        makeEntry('blog/index.md', { title: 'Blog', description: 'updates' }),
+        ...dated.map((d, i) =>
+          makeEntry(`blog/${d}-post-${i}.md`, {
+            title: `Post ${i}`,
+            date: d,
+            description: `summary ${i}`,
+            tags: i % 2 === 0 ? ['news'] : ['notes'],
+          }),
+        ),
+      ],
+    };
+  }
+
+  const blogFetch = vi.fn(async (url: string) => {
+    if (url.endsWith('/blog/index.md')) return '---\ntitle: Blog\n---\n# The Blog\n\nintro copy\n';
+    return '---\ntitle: x\ndate: 2026-01-01\n---\nbody\n';
+  });
+
+  it('renders a paginated post list at /blog and /blog/page/2', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, {
+      manifest: blogManifest(),
+      fetchText: blogFetch,
+      blog: { perPage: 2 },
+    });
+
+    // /blog resolves first to the first ordered page (index.md), which is also the blog root.
+    handle.navigate('/blog');
+    await new Promise((r) => setTimeout(r, 0));
+    let titles = [...host.querySelectorAll('.md-book-post__title')].map((n) => n.textContent);
+    expect(titles).toEqual(['Post 0', 'Post 1']); // newest first, 2 per page
+    expect(host.querySelector('.md-book-article')?.textContent).toContain('The Blog'); // index.md lead
+    expect(host.querySelector('.md-book-pagination__status')?.textContent).toBe('Page 1 of 3');
+
+    handle.navigate('/blog/page/2');
+    await new Promise((r) => setTimeout(r, 0));
+    titles = [...host.querySelectorAll('.md-book-post__title')].map((n) => n.textContent);
+    expect(titles).toEqual(['Post 2', 'Post 3']);
+    expect(document.title).toContain('page 2');
+    handle.destroy();
+  });
+
+  it('renders a tag page at /tags/:slug', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, {
+      manifest: blogManifest(),
+      fetchText: blogFetch,
+      blog: true,
+    });
+
+    handle.navigate('/tags/news');
+    await new Promise((r) => setTimeout(r, 0));
+    const titles = [...host.querySelectorAll('.md-book-post__title')].map((n) => n.textContent);
+    expect(titles).toEqual(['Post 0', 'Post 2', 'Post 4']);
+    expect(host.querySelector('.md-book-blog__lead')?.textContent).toContain('news');
+    handle.destroy();
+  });
+
+  it('leaves non-blog routes to normal page loading', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, {
+      manifest: blogManifest(),
+      fetchText: blogFetch,
+      blog: true,
+    });
+    handle.navigate('/nope');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(host.querySelector('.md-book-article')?.textContent).toContain('Page not found');
+    handle.destroy();
+  });
+});
+
 describe('defineElement', () => {
   it('registers <md-book> once and exposes observed attributes', () => {
     defineElement();

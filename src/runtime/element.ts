@@ -16,7 +16,7 @@ const SLOT_ATTR_MAP: Record<string, 'navbarEnd' | 'sidebarTop' | 'pageFooter'> =
  */
 export class MdBookElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ['manifest', 'base', 'router', 'heading', 'theme'];
+    return ['manifest', 'base', 'router', 'heading', 'theme', 'blog', 'blog-dir', 'blog-per-page'];
   }
 
   private handle: MountHandle | null = null;
@@ -59,6 +59,15 @@ export class MdBookElement extends HTMLElement {
     const themeMode = this.getAttribute('theme');
     if (themeMode === 'light' || themeMode === 'dark' || themeMode === 'system') {
       options.theme = { default: themeMode };
+    }
+
+    if (this.hasAttribute('blog')) {
+      const blog: NonNullable<MountOptions['blog']> = {};
+      const dir = this.getAttribute('blog-dir');
+      if (dir) blog.dir = dir;
+      const perPage = Number.parseInt(this.getAttribute('blog-per-page') ?? '', 10);
+      if (Number.isFinite(perPage) && perPage > 0) blog.perPage = perPage;
+      options.blog = Object.keys(blog).length > 0 ? blog : true;
     }
 
     try {

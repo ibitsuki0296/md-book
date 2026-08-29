@@ -8,6 +8,7 @@ import {
   getPrevNext,
 } from '../core/content.js';
 import { type SlotContent, createApp } from './app.js';
+import { BLOG_DEFAULTS, type BlogRuntimeConfig, resolveBlogView } from './blog.js';
 import {
   type Highlighter,
   type ScrollSpy,
@@ -39,6 +40,11 @@ export interface MountOptions {
     storageKey?: string;
     toggle?: boolean;
   };
+  /**
+   * Enable blog list / pagination / tag / category routes. Pass `true` for
+   * defaults (`blog/`, 10 per page, `/tags`, `/categories`) or an override.
+   */
+  blog?: boolean | Partial<BlogRuntimeConfig>;
   slots?: Partial<Record<'navbarEnd' | 'sidebarTop' | 'pageFooter', SlotContent>>;
   /** Test / transport overrides. */
   fetchText?: (url: string) => Promise<string>;
@@ -107,10 +113,49 @@ export async function mount(
     themeCleanup = mountThemeToggle(app.navbarEnd, theme);
   }
 
+  const blogConfig: BlogRuntimeConfig | null = options.blog
+    ? { ...BLOG_DEFAULTS, ...(options.blog === true ? {} : options.blog) }
+    : null;
+
   attachPrefetch(app.root, router, loader);
 
   async function navigateTo(path: string, hash: string): Promise<void> {
     const token = ++renderToken;
+
+    if (blogConfig) {
+      const view = resolveBlogView(path, manifest.entries, blogConfig, router, loader.has(path));
+      if (view) {
+        let leadingHTML = '';
+        if (view.hasOwnPage) {
+          try {
+            const page = await loader.load(path);
+            if (token !== renderToken) return;
+            leadingHTML = page.html;
+          } catch {
+            // fall back to the generated list only
+          }
+        }
+        app.renderPage({
+          path,
+          title: view.title,
+          contentHTML: leadingHTML + view.html,
+          sidebar: buildSidebar(manifest.entries, {
+            section: view.section ?? undefined,
+          }),
+          toc: [],
+          prevNext: {},
+        });
+        addCodeCopyButtons(app.article);
+        document.title = `${view.title} — ${site.title}`;
+        setMeta('description', site.description || '');
+        scrollSpy?.disconnect();
+        scrollSpy = null;
+        app.setActiveHeading(null);
+        afterRender(app, hash);
+        return;
+      }
+    }
+
     const resolved = resolveRoute(path, loader, orderedPages);
 
     if (!resolved) {

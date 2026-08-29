@@ -18,7 +18,16 @@
     <!-- <link rel="stylesheet" href="/themes/ink.css" /> -->
   </head>
   <body>
-    <md-book manifest="/manifest.json" base="/" router="history" theme="system"></md-book>
+    <md-book
+      manifest="/manifest.json"
+      base="/"
+      router="history"
+      theme="system"
+      blog
+      blog-per-page="5"
+    >
+      <a slot="navbar-end" href="/tags">Tags</a>
+    </md-book>
     <script src="/md-book.global.js"></script>
   </body>
 </html>

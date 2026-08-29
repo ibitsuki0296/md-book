@@ -6,6 +6,15 @@
  */
 
 export {
+  collectPosts,
+  findTaxonomy,
+  groupByCategory,
+  groupByTag,
+  paginate,
+  toDate,
+} from './core/blog.js';
+export type { BlogOptions, BlogPost, Paginated, Taxonomy } from './core/blog.js';
+export {
   assertManifest,
   buildNav,
   buildSidebar,
@@ -18,6 +27,7 @@ export {
   orderFromFilename,
   resolveRoutes,
 } from './core/content.js';
+export { type FeedFormat, type FeedOptions, generateFeed } from './core/feed.js';
 export type {
   Manifest,
   ManifestEntry,

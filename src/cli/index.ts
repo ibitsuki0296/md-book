@@ -1,12 +1,14 @@
 import { parseArgs } from 'node:util';
 import { version } from '../version.js';
 import { startDevServer } from './dev.js';
+import { writeFeeds } from './feed.js';
 import { writeManifest } from './manifest.js';
 
 const HELP = `md-book — Markdown documentation & blog toolkit
 
 Usage:
   md-book manifest <contentDir> [options]   Scan Markdown files into manifest.json
+  md-book feed <contentDir> [options]       Generate RSS / Atom / JSON blog feeds
   md-book dev [options]                     Serve a site with live reload
 
 manifest options:
@@ -16,6 +18,16 @@ manifest options:
   --title <text>        Site title stored in the manifest
   --description <text>  Site description stored in the manifest
   --drafts             Include pages with front matter draft: true
+
+feed options:
+  --site-url <url>     Absolute site URL (required), e.g. https://example.com/
+  --out <dir>          Directory to write feeds into (default: <contentDir>)
+  --title <text>       Feed title (default: the site URL host)
+  --description <text> Feed description
+  --dir <name>         Blog directory (default: blog)
+  --formats <list>     Comma list of rss,atom,json (default: all)
+  --author <name>      Default author
+  --language <code>    e.g. en, ja
 
 dev options:
   --root <dir>          Static root served to the browser (default: .)
@@ -42,6 +54,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<numbe
 
   try {
     if (command === 'manifest') return await runManifest(argv.slice(1));
+    if (command === 'feed') return runFeed(argv.slice(1));
     if (command === 'dev') return await runDev(argv.slice(1));
   } catch (err) {
     process.stderr.write(`md-book: ${(err as Error).message}\n`);
@@ -83,6 +96,53 @@ async function runManifest(args: string[]): Promise<number> {
     includeDrafts: values.drafts,
   });
   process.stdout.write(`md-book: wrote ${written} (${manifest.entries.length} pages)\n`);
+  return 0;
+}
+
+function runFeed(args: string[]): number {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      'site-url': { type: 'string' },
+      out: { type: 'string' },
+      title: { type: 'string' },
+      description: { type: 'string' },
+      dir: { type: 'string' },
+      formats: { type: 'string' },
+      author: { type: 'string' },
+      language: { type: 'string' },
+    },
+  });
+
+  const contentDir = positionals[0];
+  if (!contentDir) {
+    process.stderr.write('md-book feed: missing <contentDir>\n');
+    return 1;
+  }
+  const siteUrl = values['site-url'];
+  if (!siteUrl) {
+    process.stderr.write('md-book feed: --site-url is required\n');
+    return 1;
+  }
+
+  const formats = values.formats
+    ?.split(',')
+    .map((f) => f.trim())
+    .filter((f): f is 'rss' | 'atom' | 'json' => f === 'rss' || f === 'atom' || f === 'json');
+
+  const { written, postCount } = writeFeeds({
+    contentDir,
+    siteUrl,
+    outDir: values.out ?? contentDir,
+    title: values.title ?? new URL(siteUrl).host,
+    description: values.description,
+    dir: values.dir,
+    author: values.author,
+    language: values.language,
+    formats: formats && formats.length > 0 ? formats : undefined,
+  });
+  process.stdout.write(`md-book: wrote ${written.join(', ')} (${postCount} posts)\n`);
   return 0;
 }
 

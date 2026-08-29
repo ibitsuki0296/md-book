@@ -122,6 +122,28 @@ Paste `themeInitScript()` into `<head>` to avoid a flash of the wrong theme.
 `npm run validate:tokens` fails the build if a raw colour literal sneaks into a
 component stylesheet instead of a token.
 
+## Blog (implemented now)
+
+Any dated Markdown file under `blog/` (configurable) is a post. Enable the blog
+routes with `blog: true` (or `<md-book blog blog-per-page="10">`):
+
+- `/blog` — post list, newest first, paginated (`/blog/page/2`, …). If
+  `blog/index.md` exists its body is rendered above the list.
+- `/tags` and `/tags/:slug`, `/categories` and `/categories/:slug` — taxonomy
+  index and per-term post lists.
+
+Drafts (`draft: true`) and future-dated posts are hidden. List cards show the
+front-matter `description` as the summary.
+
+Core helpers — `collectPosts`, `paginate`, `groupByTag` / `groupByCategory` — and
+`generateFeed(posts, options, 'rss' | 'atom' | 'json')` are exported for build
+tools. The CLI writes all three:
+
+```bash
+npx md-book feed ./content --site-url https://example.com/ --title "My blog"
+# -> content/feed.xml, content/atom.xml, content/feed.json
+```
+
 ## Development
 
 ```bash
@@ -146,7 +168,7 @@ for the full requirements doc. Milestones:
 | **M2 content model** *(done)* | Manifest type + validation, route resolution, nav/sidebar, prev/next, `md-book manifest` + `md-book dev` |
 | **M3 runtime UI** *(done)* | `<md-book>` element + `mount()`, client router, app shell, page loader/cache, scroll-spy, code copy, CDN global build |
 | **M4 theming** *(done)* | `--md-book-*` token contract, `@layer` stylesheet, light/dark, theme controller + FOUC guard + header toggle, reference themes, token validator |
-| M5 | Blog: post collection, pagination, tag/category pages, RSS/Atom/JSON feed |
+| **M5 blog** *(done)* | `collectPosts` + date sort, `paginate`, tag/category grouping, list / pagination / taxonomy routes in the runtime, `generateFeed` (RSS/Atom/JSON) + `md-book feed` |
 | M6 | a11y, size budget, SEO meta, demo site, docs, distribution (ESM/CJS/UMD/CSS), first release |
 
 ## License
