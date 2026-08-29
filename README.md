@@ -1,4 +1,4 @@
-# @md-book/core
+# @ibitsuki0296/md-book
 
 Runtime-first Markdown **documentation & blog** library with token-based theming.
 
@@ -14,12 +14,12 @@ share it.
 ## Why "md-book"
 
 The bare npm name `md-book` was taken, so the package publishes as
-`@md-book/core`. The project, repo, and CLI keep the name `md-book`.
+`@ibitsuki0296/md-book`. The project, repo, and CLI keep the name `md-book`.
 
 ## Install
 
 ```bash
-npm install @md-book/core
+npm install @ibitsuki0296/md-book
 ```
 
 ## Core API (implemented now)
@@ -29,7 +29,7 @@ metadata the runtime and SSG layers need. It never touches the DOM or the
 filesystem.
 
 ```ts
-import { renderMarkdown } from '@md-book/core';
+import { renderMarkdown } from '@ibitsuki0296/md-book';
 
 const { html, frontMatter, toc, headings, excerpt } = renderMarkdown(source, {
   tocDepth: [2, 3],
@@ -72,13 +72,13 @@ The runtime renders a full site in the browser from a manifest — no build step
 
 ```html
 <md-book manifest="/manifest.json" base="/" router="history"></md-book>
-<script src="https://cdn.example/@md-book/core/md-book.global.js"></script>
+<script src="https://cdn.example/@ibitsuki0296/md-book/md-book.global.js"></script>
 ```
 
 or programmatically:
 
 ```ts
-import { mount } from '@md-book/core/runtime';
+import { mount } from '@ibitsuki0296/md-book/runtime';
 
 const site = await mount('#app', { manifestUrl: '/manifest.json' });
 site.navigate('/guide/getting-started');
@@ -105,8 +105,8 @@ through them, so **a theme is just a stylesheet that redefines tokens** — load
 after `style.css`:
 
 ```html
-<link rel="stylesheet" href="@md-book/core/style.css" />
-<link rel="stylesheet" href="@md-book/core/themes/ink.css" />   <!-- or your own -->
+<link rel="stylesheet" href="@ibitsuki0296/md-book/style.css" />
+<link rel="stylesheet" href="@ibitsuki0296/md-book/themes/ink.css" />   <!-- or your own -->
 ```
 
 The bundled rules live in `@layer md-book.tokens, .base, .layout, .content,

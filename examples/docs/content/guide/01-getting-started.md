@@ -8,7 +8,7 @@ description: Install md-book and render your first page.
 ## Install
 
 ```bash
-npm install @md-book/core
+npm install @ibitsuki0296/md-book
 ```
 
 ## Generate a manifest
@@ -25,7 +25,7 @@ This writes `content/manifest.json`. Commit it, or regenerate it in CI.
 ## Render a page
 
 ```ts
-import { renderMarkdown } from '@md-book/core';
+import { renderMarkdown } from '@ibitsuki0296/md-book';
 
 const { html, toc, frontMatter } = renderMarkdown(source, {
   linkRewrite: { currentPath: '/guide/getting-started' },

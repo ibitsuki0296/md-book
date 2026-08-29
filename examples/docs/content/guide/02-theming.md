@@ -10,7 +10,7 @@ theme is a single `.css` file that redefines them — load it **after**
 `style.css`:
 
 ```html
-<link rel="stylesheet" href="@md-book/core/style.css" />
+<link rel="stylesheet" href="@ibitsuki0296/md-book/style.css" />
 <link rel="stylesheet" href="/my-theme.css" />
 ```
 

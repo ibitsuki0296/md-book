@@ -1,5 +1,5 @@
 {
-  "name": "@md-book/core",
+  "name": "@ibitsuki0296/md-book",
   "version": "0.1.0",
   "description": "Runtime-first Markdown documentation & blog site library with token-based theming",
   "type": "module",

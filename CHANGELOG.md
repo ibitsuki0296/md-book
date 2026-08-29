@@ -1,4 +1,4 @@
-# @md-book/core
+# @ibitsuki0296/md-book
 
 ## 0.1.0
 

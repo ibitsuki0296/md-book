@@ -25,7 +25,7 @@ are lifted into those regions of the shell.
 ## `mount(target, options)`
 
 ```ts
-import { mount } from '@md-book/core/runtime';
+import { mount } from '@ibitsuki0296/md-book/runtime';
 
 await mount('#app', {
   manifestUrl: '/manifest.json',
