@@ -2,7 +2,7 @@
 title: Hello, world
 date: 2026-02-01
 tags: [meta, release]
-author: Hazuki Abe
+author: Hazuki ABE
 ---
 
 The first cut of **md-book** is here: the core Markdown pipeline and the content

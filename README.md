@@ -184,4 +184,4 @@ for the full requirements doc. Milestones:
 
 ## License
 
-MIT © Hazuki Abe
+MIT © Hazuki ABE

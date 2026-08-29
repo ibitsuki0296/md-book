@@ -4,14 +4,14 @@
   "description": "Runtime-first Markdown documentation & blog site library with token-based theming",
   "type": "module",
   "license": "MIT",
-  "author": "Hazuki Abe",
-  "homepage": "https://github.com/hazuki/md-book#readme",
+  "author": "Hazuki ABE",
+  "homepage": "https://github.com/ibitsuki0296/md-book#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hazuki/md-book.git"
+    "url": "git+https://github.com/ibitsuki0296/md-book.git"
   },
   "bugs": {
-    "url": "https://github.com/hazuki/md-book/issues"
+    "url": "https://github.com/ibitsuki0296/md-book/issues"
   },
   "keywords": [
     "markdown",
