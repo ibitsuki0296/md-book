@@ -1,0 +1,66 @@
+{
+  "name": "@md-book/core",
+  "version": "0.0.0",
+  "description": "Runtime-first Markdown documentation & blog site library with token-based theming",
+  "type": "module",
+  "license": "MIT",
+  "author": "Hazuki Abe",
+  "keywords": [
+    "markdown",
+    "documentation",
+    "blog",
+    "static-site",
+    "docs",
+    "theme",
+    "web-component"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.9.0",
+  "bin": {
+    "md-book": "./dist/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.mjs"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.mjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./themes/*": "./dist/themes/*"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": ["*.css"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "github-slugger": "^2.0.0",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0",
+    "markdown-it-footnote": "^4.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.7"
+  }
+}
