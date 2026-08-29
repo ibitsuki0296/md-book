@@ -23,7 +23,7 @@
     "web-component"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "packageManager": "npm@11.9.0",
   "main": "./dist/index.cjs",
