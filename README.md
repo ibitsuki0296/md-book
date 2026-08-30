@@ -122,6 +122,25 @@ Paste `themeInitScript()` into `<head>` to avoid a flash of the wrong theme.
 `npm run validate:tokens` fails the build if a raw colour literal sneaks into a
 component stylesheet instead of a token.
 
+### Theme playground
+
+An interactive editor for the token contract lives in `examples/playground/`:
+
+```bash
+npm run playground   # build + serve at http://localhost:4180
+```
+
+Tweak colours, typography, and layout/shape — with **light and dark edited
+independently** — while a real `<md-book>` site (the `examples/docs` content)
+re-styles live in a preview frame. Seed from a built-in theme (`default`, `ink`),
+then **Copy** or **Download** the result as a drop-in stylesheet (`:root` +
+`:root[data-theme="dark"]` + an optional `@media (prefers-color-scheme: dark)`
+block), matching the format of `themes/ink.css`.
+
+It is local tooling — vanilla ES modules, no build step, and not part of the
+published package. `examples/playground/tokens.js` mirrors `src/styles/tokens.css`
+and must be kept in sync when tokens change.
+
 ## Blog (implemented now)
 
 Any dated Markdown file under `blog/` (configurable) is a post. Enable the blog
@@ -155,6 +174,7 @@ npm run lint          # biome
 npm run size          # size-limit (CDN bundle budget)
 npm run validate:tokens
 npm run example       # build + serve examples/docs at :4173
+npm run playground    # build + serve the theme playground at :4180
 ```
 
 `examples/docs/` is both the dev-server fixture and the documentation site

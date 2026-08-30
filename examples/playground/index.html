@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>md-book theme playground</title>
+    <link rel="stylesheet" href="./playground.css" />
+  </head>
+  <body>
+    <header class="pg-topbar">
+      <div class="pg-topbar-title">
+        <strong>md-book</strong> <span>theme playground</span>
+      </div>
+      <div class="pg-topbar-actions">
+        <div class="pg-seg" role="group" aria-label="Mode being edited">
+          <button id="pg-mode-light" type="button" aria-pressed="true">Light</button>
+          <button id="pg-mode-dark" type="button" aria-pressed="false">Dark</button>
+        </div>
+        <label class="pg-inline">
+          Preset
+          <select id="pg-preset" aria-label="Load a preset theme">
+            <option value="" selected>Load…</option>
+            <option value="default">Default</option>
+            <option value="ink">Ink (serif, green)</option>
+          </select>
+        </label>
+        <button id="pg-reset" type="button" class="pg-btn">Reset</button>
+        <label class="pg-inline pg-check">
+          <input type="checkbox" id="pg-advanced" />
+          Advanced tokens
+        </label>
+      </div>
+    </header>
+
+    <main class="pg-layout">
+      <aside class="pg-panel">
+        <div id="pg-controls" class="pg-controls"></div>
+
+        <section class="pg-export">
+          <h2>Export theme CSS</h2>
+          <div class="pg-export-opts">
+            <label class="pg-check"
+              ><input type="checkbox" id="pg-only-changed" checked /> Changed tokens only</label
+            >
+            <label class="pg-check"
+              ><input type="checkbox" id="pg-with-media" checked /> Include
+              <code>@media (prefers-color-scheme)</code></label
+            >
+          </div>
+          <textarea id="pg-css" spellcheck="false" readonly rows="12"></textarea>
+          <div class="pg-export-actions">
+            <button id="pg-copy" type="button" class="pg-btn pg-btn-primary">Copy</button>
+            <button id="pg-download" type="button" class="pg-btn">Download .css</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="pg-preview">
+        <div class="pg-preview-bar">
+          <label class="pg-inline">
+            Preview page
+            <select id="pg-route" aria-label="Preview page">
+              <option value="/">Home</option>
+              <option value="/guide/getting-started">Guide · Getting started</option>
+              <option value="/guide/theming">Guide · Theming</option>
+              <option value="/blog">Blog index</option>
+              <option value="/blog/hello-world">Blog post</option>
+            </select>
+          </label>
+          <span class="pg-preview-hint">Live <code>&lt;md-book&gt;</code> — navigate freely inside</span>
+        </div>
+        <iframe
+          id="pg-frame"
+          class="pg-frame"
+          title="md-book preview"
+          src="./preview.html#/"
+        ></iframe>
+      </section>
+    </main>
+
+    <script type="module" src="./playground.js"></script>
+  </body>
+</html>

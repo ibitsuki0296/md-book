@@ -12,3 +12,4 @@ CLAUDE.md
 # example smoke artifacts
 examples/**/md-book.global.js
 examples/**/md-book.global.js.map
+examples/playground/style.css

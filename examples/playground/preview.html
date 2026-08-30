@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>md-book preview</title>
+    <script>
+      /* The playground owns the theme — clear any persisted md-book choice so the
+         runtime's controller does not fight the data-theme we set from the parent. */
+      try {
+        localStorage.removeItem('md-book-theme');
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <md-book
+      manifest="/manifest.json"
+      base="/"
+      router="hash"
+      theme="light"
+      blog
+      blog-per-page="5"
+      site-url="https://md-book.example/"
+    >
+      <a slot="navbar-end" href="#/tags">Tags</a>
+    </md-book>
+    <script src="./md-book.global.js"></script>
+    <script type="module">
+      let desired = 'light';
+
+      const root = document.documentElement;
+      const setMode = (mode) => {
+        desired = mode === 'dark' ? 'dark' : 'light';
+        if (root.getAttribute('data-theme') !== desired) {
+          root.setAttribute('data-theme', desired);
+        }
+      };
+
+      // If the md-book runtime (or anything else) rewrites data-theme, put it back.
+      new MutationObserver(() => {
+        if (root.getAttribute('data-theme') !== desired) {
+          root.setAttribute('data-theme', desired);
+        }
+      }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+      const applyCss = (css) => {
+        let style = document.getElementById('pg-overrides');
+        if (!style) {
+          style = document.createElement('style');
+          style.id = 'pg-overrides';
+          document.head.appendChild(style);
+        }
+        style.textContent = css;
+      };
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        const data = event.data || {};
+        if (data.type === 'pg-apply') {
+          setMode(data.mode);
+          if (typeof data.css === 'string') applyCss(data.css);
+        }
+      });
+
+      const ping = () => window.parent?.postMessage({ type: 'pg-ready' }, window.location.origin);
+      ping();
+      window.addEventListener('load', ping);
+    </script>
+  </body>
+</html>

@@ -64,7 +64,8 @@
     "size": "size-limit",
     "release": "npm run build && changeset publish",
     "prepare": "lefthook install || true",
-    "example": "npm run build && cp dist/md-book.global.js dist/style.css examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --port 4173"
+    "example": "npm run build && cp dist/md-book.global.js dist/style.css examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --port 4173",
+    "playground": "npm run build && cp dist/md-book.global.js dist/style.css examples/playground/ && node dist/cli.mjs dev --root examples/playground --content examples/docs/content --port 4180"
   },
   "dependencies": {
     "github-slugger": "^2.0.0",
