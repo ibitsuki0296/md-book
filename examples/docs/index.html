@@ -18,11 +18,14 @@
     <!-- <link rel="stylesheet" href="/themes/ink.css" /> -->
   </head>
   <body>
+    <!-- lang="ja" localises the generated UI (pager, code-copy, blog chrome,
+         theme toggle, messages) and sets <html lang>. Omit it for English. -->
     <md-book
       manifest="/manifest.json"
       base="/"
       router="history"
       theme="system"
+      lang="ja"
       blog
       blog-per-page="5"
       site-url="https://md-book.example/"

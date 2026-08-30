@@ -3,7 +3,7 @@
 export default {
   title: 'md-book example',
   description: 'A runtime-first Markdown documentation and blog library.',
-  lang: 'en',
+  lang: 'ja',
   base: '/',
   contentDir: './content',
   nav: 'auto',

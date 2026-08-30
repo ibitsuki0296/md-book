@@ -28,6 +28,15 @@ export {
   resolveRoutes,
 } from './core/content.js';
 export { type FeedFormat, type FeedOptions, generateFeed } from './core/feed.js';
+export {
+  createStrings,
+  DEFAULT_LOCALE,
+  getStrings,
+  type Locale,
+  resolveLocale,
+  SUPPORTED_LOCALES,
+  type UIStrings,
+} from './core/i18n.js';
 export type {
   Manifest,
   ManifestEntry,

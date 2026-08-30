@@ -1,4 +1,5 @@
 import type { NavItem, PrevNext, RouteNode } from '../core/content.js';
+import type { UIStrings } from '../core/i18n.js';
 import type { TocEntry } from '../core/types.js';
 import { h, replaceChildren } from './dom.js';
 import type { Router } from './router.js';
@@ -13,6 +14,7 @@ export type SlotContent = string | Node;
 export interface AppOptions {
   site: AppSite;
   router: Router;
+  strings: UIStrings;
   slots?: Partial<Record<'navbarEnd' | 'sidebarTop' | 'pageFooter', SlotContent>>;
 }
 
@@ -42,10 +44,10 @@ const CONTENT_ID = 'md-book-content';
 
 /** Builds the app shell once; subsequent calls update regions in place. */
 export function createApp(target: HTMLElement, options: AppOptions): App {
-  const { router } = options;
+  const { router, strings } = options;
 
   const brand = h('a', { class: 'md-book-brand', href: router.href('/') }, options.site.title);
-  const nav = h('nav', { class: 'md-book-nav', aria: { label: 'Main navigation' } });
+  const nav = h('nav', { class: 'md-book-nav', aria: { label: strings.mainNavLabel } });
   const navbarEnd = h('div', { class: 'md-book-navbar-end' });
   applySlot(navbarEnd, options.slots?.navbarEnd);
 
@@ -53,11 +55,14 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
 
   const sidebarTop = h('div', { class: 'md-book-sidebar__top' });
   applySlot(sidebarTop, options.slots?.sidebarTop);
-  const sidebarNav = h('nav', { class: 'md-book-sidebar__nav', aria: { label: 'Sidebar' } });
+  const sidebarNav = h('nav', {
+    class: 'md-book-sidebar__nav',
+    aria: { label: strings.sidebarLabel },
+  });
   const sidebar = h('aside', { class: 'md-book-sidebar' }, sidebarTop, sidebarNav);
 
   const article = h('article', { class: 'md-book-article' });
-  const pager = h('nav', { class: 'md-book-pager', aria: { label: 'Page navigation' } });
+  const pager = h('nav', { class: 'md-book-pager', aria: { label: strings.pageNavLabel } });
   const pageFooter = h('footer', { class: 'md-book-page-footer' });
   applySlot(pageFooter, options.slots?.pageFooter);
   const content = h(
@@ -68,13 +73,13 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     pageFooter,
   );
 
-  const tocNav = h('nav', { class: 'md-book-toc', aria: { label: 'On this page' } });
+  const tocNav = h('nav', { class: 'md-book-toc', aria: { label: strings.onThisPageLabel } });
 
   const body = h('div', { class: 'md-book-body' }, sidebar, content, tocNav);
   const root = h(
     'div',
     { class: 'md-book' },
-    h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, 'Skip to content'),
+    h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, strings.skipToContent),
     header,
     body,
   );
@@ -96,7 +101,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     replaceChildren(sidebarNav, renderSidebar(state.sidebar, router, state.path));
     replaceChildren(tocNav, ...renderToc(state.toc, router));
     tocNav.hidden = state.toc.length === 0;
-    replaceChildren(pager, ...renderPager(state.prevNext, router));
+    replaceChildren(pager, ...renderPager(state.prevNext, router, strings));
     highlightCurrent(nav, router.current);
   };
 
@@ -174,7 +179,7 @@ function renderToc(entries: TocEntry[], router: Router): HTMLElement[] {
   return [build(entries)];
 }
 
-function renderPager(prevNext: PrevNext, router: Router): HTMLElement[] {
+function renderPager(prevNext: PrevNext, router: Router, strings: UIStrings): HTMLElement[] {
   const out: HTMLElement[] = [];
   if (prevNext.prev) {
     out.push(
@@ -184,7 +189,7 @@ function renderPager(prevNext: PrevNext, router: Router): HTMLElement[] {
           class: 'md-book-pager__link md-book-pager__link--prev',
           href: router.href(prevNext.prev.path),
         },
-        h('span', { class: 'md-book-pager__dir' }, 'Previous'),
+        h('span', { class: 'md-book-pager__dir' }, strings.previous),
         h('span', { class: 'md-book-pager__title' }, prevNext.prev.title),
       ),
     );
@@ -197,7 +202,7 @@ function renderPager(prevNext: PrevNext, router: Router): HTMLElement[] {
           class: 'md-book-pager__link md-book-pager__link--next',
           href: router.href(prevNext.next.path),
         },
-        h('span', { class: 'md-book-pager__dir' }, 'Next'),
+        h('span', { class: 'md-book-pager__dir' }, strings.next),
         h('span', { class: 'md-book-pager__title' }, prevNext.next.title),
       ),
     );

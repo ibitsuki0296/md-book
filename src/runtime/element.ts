@@ -8,7 +8,9 @@ const SLOT_ATTR_MAP: Record<string, 'navbarEnd' | 'sidebarTop' | 'pageFooter'> =
 };
 
 /**
- * `<md-book manifest="/manifest.json" base="/" router="history">`.
+ * `<md-book manifest="/manifest.json" base="/" router="history" lang="ja">`.
+ *
+ * `lang` sets the UI locale for generated chrome (`en` default, `ja` supported).
  *
  * Renders into light DOM so the site stylesheet and themes apply. Children with
  * a `slot="navbar-end" | "sidebar-top" | "page-footer"` attribute are lifted
@@ -21,6 +23,7 @@ export class MdBookElement extends HTMLElement {
       'base',
       'router',
       'heading',
+      'lang',
       'theme',
       'blog',
       'blog-dir',
@@ -64,6 +67,8 @@ export class MdBookElement extends HTMLElement {
     if (base) options.base = base;
     const heading = this.getAttribute('heading');
     if (heading) options.title = heading;
+    const lang = this.getAttribute('lang');
+    if (lang) options.locale = lang;
     const router = this.getAttribute('router');
     if (router === 'hash' || router === 'history') options.routerMode = router as RouterMode;
     const themeMode = this.getAttribute('theme');

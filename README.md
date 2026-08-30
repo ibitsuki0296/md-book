@@ -89,7 +89,8 @@ pager, footer), runs a History-API (or `hash`) client router that intercepts
 internal links and prefetches on hover, fetches + renders each page through the
 core, adds copy buttons to code blocks, tracks the active heading for the TOC,
 and keeps `<title>` / `meta[description]` in sync. Pass `highlight: (code, lang)
-=> html` to plug in a syntax highlighter.
+=> html` to plug in a syntax highlighter, and `locale: 'ja'` to localise the
+generated UI (see [Internationalisation](#internationalisation-implemented-now)).
 
 Run the example site (`examples/docs/`):
 
@@ -163,6 +164,43 @@ npx md-book feed ./content --site-url https://example.com/ --title "My blog"
 # -> content/feed.xml, content/atom.xml, content/feed.json
 ```
 
+## Internationalisation (implemented now)
+
+The strings the runtime renders itself — pager, code-copy button, skip link,
+blog list / pagination / taxonomy labels, theme-toggle `aria-label`s, and the
+route error messages — are translatable. `en` (default) and `ja` ship built in.
+
+```html
+<md-book manifest="/manifest.json" base="/" lang="ja"></md-book>
+```
+
+```ts
+await mount('#app', {
+  manifestUrl: '/manifest.json',
+  locale: 'ja',                     // BCP-47 tags accepted; unknown -> 'en'
+  strings: { copy: 'クリップボードへ' }, // optional per-string overrides
+});
+```
+
+The resolved locale is written to `<html lang>` and emitted as `og:locale`, and
+blog post dates are formatted with `Intl.DateTimeFormat` for it (the
+`<time datetime>` attribute stays ISO).
+
+The tables and helpers are pure and exported for an SSG layer:
+
+```ts
+import {
+  resolveLocale,   // 'ja-JP' -> 'ja', unknown -> 'en'
+  getStrings,      // full UIStrings table for a locale
+  createStrings,   // resolve + shallow-merge overrides
+  SUPPORTED_LOCALES,
+  type UIStrings,
+} from '@ibitsuki0296/md-book';
+```
+
+Add a locale by extending `src/core/i18n.ts`. Translating page **content**
+(locale routing, per-locale manifests) is not in scope yet.
+
 ## Development
 
 ```bash
@@ -200,7 +238,8 @@ for the full requirements doc. Milestones:
 | **M4 theming** *(done)* | `--md-book-*` token contract, `@layer` stylesheet, light/dark, theme controller + FOUC guard + header toggle, reference themes, token validator |
 | **M5 blog** *(done)* | `collectPosts` + date sort, `paginate`, tag/category grouping, list / pagination / taxonomy routes in the runtime, `generateFeed` (RSS/Atom/JSON) + `md-book feed` |
 | **M6 hardening** *(done)* | SEO head (canonical / OG / Twitter / Article JSON-LD), a11y structure + tests, `size-limit`, SRI hash, GitHub Actions CI, lefthook, Changesets, docs content, `0.1.0` |
-| next | Static-build (SSG) mode; Astro / Vite / Next adapters; client-side search; Mermaid / KaTeX; i18n |
+| **UI i18n** *(done, unreleased)* | `en` / `ja` string tables (`src/core/i18n.ts`), `mount({ locale })` + `<md-book lang>`, `<html lang>` / `og:locale` sync, `Intl`-formatted blog dates |
+| next | Static-build (SSG) mode; Astro / Vite / Next adapters; client-side search; Mermaid / KaTeX; content-level i18n (locale routing) |
 
 ## License
 

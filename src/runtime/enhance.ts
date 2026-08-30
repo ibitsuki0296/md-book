@@ -1,9 +1,24 @@
+import type { UIStrings } from '../core/i18n.js';
+
 export type Highlighter = (code: string, lang: string | null) => string | Promise<string>;
+
+/** The subset of {@link UIStrings} the copy button needs. */
+export type CopyLabels = Pick<UIStrings, 'copy' | 'copied' | 'copyFailed' | 'copyAriaLabel'>;
+
+const DEFAULT_COPY_LABELS: CopyLabels = {
+  copy: 'Copy',
+  copied: 'Copied',
+  copyFailed: 'Failed',
+  copyAriaLabel: 'Copy code to clipboard',
+};
 
 const LANG_CLASS = /(?:^|\s)language-([\w+-]+)/;
 
 /** Wraps each `<pre><code>` in a figure with a copy-to-clipboard button. */
-export function addCodeCopyButtons(root: ParentNode): void {
+export function addCodeCopyButtons(
+  root: ParentNode,
+  labels: CopyLabels = DEFAULT_COPY_LABELS,
+): void {
   for (const pre of root.querySelectorAll('pre')) {
     const code = pre.querySelector('code');
     if (!code || pre.closest('.md-book-code')) continue;
@@ -16,14 +31,14 @@ export function addCodeCopyButtons(root: ParentNode): void {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'md-book-code__copy';
-    button.textContent = 'Copy';
-    button.setAttribute('aria-label', 'Copy code to clipboard');
+    button.textContent = labels.copy;
+    button.setAttribute('aria-label', labels.copyAriaLabel);
     button.addEventListener('click', () => {
       void copyText(code.textContent ?? '').then((ok) => {
-        button.textContent = ok ? 'Copied' : 'Failed';
+        button.textContent = ok ? labels.copied : labels.copyFailed;
         button.classList.toggle('is-copied', ok);
         window.setTimeout(() => {
-          button.textContent = 'Copy';
+          button.textContent = labels.copy;
           button.classList.remove('is-copied');
         }, 2000);
       });

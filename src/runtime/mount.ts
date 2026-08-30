@@ -7,6 +7,7 @@ import {
   flattenPages,
   getPrevNext,
 } from '../core/content.js';
+import { type UIStrings, createStrings } from '../core/i18n.js';
 import { type SlotContent, createApp } from './app.js';
 import { BLOG_DEFAULTS, type BlogRuntimeConfig, resolveBlogView } from './blog.js';
 import {
@@ -31,6 +32,14 @@ export interface MountOptions {
   /** Site title for the header and `<title>`. Defaults to the root page's title. */
   title?: string;
   description?: string;
+  /**
+   * UI language for runtime-generated labels (pager, code-copy, blog chrome,
+   * theme toggle, messages). `en` (default) or `ja`; BCP-47 tags accepted, and
+   * anything unknown falls back to `en`. Also sets `<html lang>`.
+   */
+  locale?: string;
+  /** Per-string overrides merged over the resolved locale's table. */
+  strings?: Partial<UIStrings>;
   tocDepth?: [number, number];
   routerMode?: RouterMode;
   /** Optional syntax highlighter run over code blocks after each render. */
@@ -91,6 +100,9 @@ export async function mount(
   const site = { title: rootTitle, description: options.description ?? manifest.description };
   const seo: SeoConfig = { siteName: rootTitle, ...options.seo };
 
+  const { locale, strings: t } = createStrings(options.locale, options.strings);
+  if (typeof document !== 'undefined') document.documentElement.lang = locale;
+
   let scrollSpy: ScrollSpy | null = null;
   let renderToken = 0;
   let firstNavigation: Promise<void> | undefined;
@@ -105,7 +117,7 @@ export async function mount(
     },
   });
 
-  const app = createApp(host, { site, router, slots: options.slots });
+  const app = createApp(host, { site, router, strings: t, slots: options.slots });
   app.renderNav(buildNav(manifest.entries));
 
   const theme = createThemeController({
@@ -114,7 +126,7 @@ export async function mount(
   });
   let themeCleanup: (() => void) | undefined;
   if (options.theme?.toggle !== false) {
-    themeCleanup = mountThemeToggle(app.navbarEnd, theme);
+    themeCleanup = mountThemeToggle(app.navbarEnd, theme, t);
   }
 
   const blogConfig: BlogRuntimeConfig | null = options.blog
@@ -127,7 +139,10 @@ export async function mount(
     const token = ++renderToken;
 
     if (blogConfig) {
-      const view = resolveBlogView(path, manifest.entries, blogConfig, router, loader.has(path));
+      const view = resolveBlogView(path, manifest.entries, blogConfig, router, loader.has(path), {
+        strings: t,
+        locale,
+      });
       if (view) {
         let leadingHTML = '';
         if (view.hasOwnPage) {
@@ -149,13 +164,14 @@ export async function mount(
           toc: [],
           prevNext: {},
         });
-        addCodeCopyButtons(app.article);
+        addCodeCopyButtons(app.article, t);
         applyHead(
           {
             title: `${view.title} — ${site.title}`,
             description: site.description || '',
             routePath: path,
             type: 'website',
+            locale,
           },
           seo,
         );
@@ -170,8 +186,8 @@ export async function mount(
     const resolved = resolveRoute(path, loader, orderedPages);
 
     if (!resolved) {
-      app.renderMessage('Page not found', `No page is registered for “${path}”.`);
-      document.title = `Not found — ${site.title}`;
+      app.renderMessage(t.pageNotFound, t.pageNotFoundBody(path));
+      document.title = t.notFoundDocTitle(site.title);
       return;
     }
 
@@ -189,7 +205,7 @@ export async function mount(
         prevNext: getPrevNext(orderedPages, resolved),
       });
 
-      addCodeCopyButtons(app.article);
+      addCodeCopyButtons(app.article, t);
       if (options.highlight) await applyHighlight(app.article, options.highlight);
 
       const pageTitle = page.frontMatter.title ?? entryTitle(page.entry);
@@ -202,12 +218,13 @@ export async function mount(
           description: page.excerpt || site.description || '',
           routePath: resolved,
           type: isArticle ? 'article' : 'website',
+          locale,
           image: typeof page.frontMatter.cover === 'string' ? page.frontMatter.cover : undefined,
           publishedTime: isoOrUndefined(page.frontMatter.date),
           modifiedTime: isoOrUndefined(page.frontMatter.updated),
           author: typeof page.frontMatter.author === 'string' ? page.frontMatter.author : undefined,
           tags: Array.isArray(page.frontMatter.tags)
-            ? page.frontMatter.tags.filter((t): t is string => typeof t === 'string')
+            ? page.frontMatter.tags.filter((tag): tag is string => typeof tag === 'string')
             : undefined,
         },
         seo,
@@ -223,7 +240,7 @@ export async function mount(
       afterRender(app, hash);
     } catch (err) {
       if (token !== renderToken) return;
-      const message = err instanceof PageNotFoundError ? 'Page not found' : 'Failed to load page';
+      const message = err instanceof PageNotFoundError ? t.pageNotFound : t.failedToLoad;
       app.renderMessage(message, (err as Error).message);
     }
   }
@@ -246,7 +263,11 @@ export async function mount(
 }
 
 /** Adds a light/dark toggle button to the header and keeps its label in sync. */
-function mountThemeToggle(navbarEnd: HTMLElement, theme: ThemeController): () => void {
+function mountThemeToggle(
+  navbarEnd: HTMLElement,
+  theme: ThemeController,
+  strings: UIStrings,
+): () => void {
   navbarEnd.hidden = false;
   const button = document.createElement('button');
   button.type = 'button';
@@ -255,7 +276,7 @@ function mountThemeToggle(navbarEnd: HTMLElement, theme: ThemeController): () =>
   const sync = () => {
     const dark = theme.resolved() === 'dark';
     button.textContent = dark ? '☀' : '☾';
-    button.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    button.setAttribute('aria-label', dark ? strings.switchToLight : strings.switchToDark);
     button.setAttribute('aria-pressed', String(dark));
   };
   sync();

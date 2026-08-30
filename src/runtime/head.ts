@@ -23,6 +23,8 @@ export interface HeadInput {
   modifiedTime?: string;
   author?: string;
   tags?: string[];
+  /** UI locale, emitted as `og:locale` when set. */
+  locale?: string;
 }
 
 const MANAGED_ATTR = 'data-md-book-head';
@@ -53,6 +55,7 @@ export function applyHead(input: HeadInput, config: SeoConfig): void {
     [{ property: 'og:url' }, url],
   ];
   if (config.siteName) tags.push([{ property: 'og:site_name' }, config.siteName]);
+  if (input.locale) tags.push([{ property: 'og:locale' }, input.locale]);
   if (image) tags.push([{ property: 'og:image' }, image]);
   tags.push([{ name: 'twitter:card' }, image ? 'summary_large_image' : 'summary']);
   if (config.twitterSite) tags.push([{ name: 'twitter:site' }, config.twitterSite]);
