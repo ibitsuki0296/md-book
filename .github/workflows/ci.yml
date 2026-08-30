@@ -26,6 +26,11 @@ jobs:
     needs: verify
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    # Changesets makes a version-bump / changelog commit in this job. git is
+    # already checked by the `verify` job, so disable the local lefthook hooks
+    # that would otherwise run (and can fail) on that automated commit.
+    env:
+      LEFTHOOK: "0"
     permissions:
       contents: write
       pull-requests: write
