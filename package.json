@@ -1,6 +1,6 @@
 {
   "name": "@ibitsuki0296/md-book",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Runtime-first Markdown documentation & blog site library with token-based theming",
   "type": "module",
   "license": "MIT",
@@ -50,8 +50,14 @@
     "./style.css": "./dist/style.css",
     "./themes/*": "./dist/themes/*"
   },
-  "files": ["dist", "README.md", "LICENSE"],
-  "sideEffects": ["*.css"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
     "build": "tsup && node scripts/postbuild.mjs",
     "dev": "tsup --watch",
