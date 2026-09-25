@@ -79,6 +79,9 @@
       "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
       "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
     --md-book-font-heading: var(--md-book-font-body);
+    /* Vertical writing (writing: vertical) and tanka read best in a mincho face. */
+    --md-book-font-serif: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", YuMincho,
+      "Noto Serif JP", "Source Han Serif JP", "BIZ UDMincho", "MS PMincho", ui-serif, serif;
     --md-book-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "SFMono-Regular", "Menlo",
       "Consolas", "Liberation Mono", monospace;
     --md-book-text-base: 1rem;
@@ -88,6 +91,7 @@
 
     /* --- layout & shape -------------------------------------------------- */
     --md-book-measure: 46rem;
+    --md-book-vertical-height: clamp(22rem, 72vh, 42rem);
     --md-book-content-max: 90rem;
     --md-book-sidebar-width: 16rem;
     --md-book-toc-width: 14rem;
@@ -335,6 +339,11 @@
     margin-inline: auto;
   }
 
+  /* Vertical writing: the article scrolls sideways, so let it use the full column. */
+  .md-book--vertical .md-book-main {
+    max-width: none;
+  }
+
   /* Tablet: drop the TOC rail. */
   @media (max-width: 1100px) {
     .md-book-body {
@@ -514,6 +523,12 @@
     color: var(--md-book-color-fg-muted);
   }
 
+  /* Ruby readings stay light and unspaced even inside tracked-out poems. */
+  .md-book-article rt {
+    font-weight: 400;
+    letter-spacing: normal;
+  }
+
   .md-book-article :not(pre) > code {
     font-family: var(--md-book-font-mono);
     font-size: 0.86em;
@@ -653,6 +668,97 @@
     color: var(--md-book-color-fg-muted);
     border-top: var(--md-book-border-width) solid var(--md-book-color-border);
     margin-top: 2.5rem;
+  }
+  /* --- vertical writing (`writing: vertical`, 縦書き) ------------------------
+     The article becomes a fixed-height, sideways-scrolling column set: lines
+     run top to bottom and stack right to left. Physical margins/paddings from
+     the horizontal rules above are re-expressed for that flow. */
+  .md-book-article--vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-combine-upright: digits 2;
+    line-break: strict;
+    /* Orthogonal flow: width is the block size, so pin it to the column or it
+       grows with the content instead of scrolling. */
+    width: 100%;
+    height: var(--md-book-vertical-height);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+    font-family: var(--md-book-font-serif);
+    line-height: 2;
+    letter-spacing: 0.04em;
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-book-color-border) transparent;
+  }
+
+  .md-book-article--vertical h1,
+  .md-book-article--vertical h2,
+  .md-book-article--vertical h3,
+  .md-book-article--vertical h4 {
+    font-family: var(--md-book-font-serif);
+    letter-spacing: 0.1em;
+    text-wrap: initial;
+    margin: 0 0 0 1.25rem;
+  }
+
+  .md-book-article--vertical h2,
+  .md-book-article--vertical h3,
+  .md-book-article--vertical h4 {
+    margin-inline: 0;
+    margin-block: 2rem 0.75rem;
+  }
+
+  .md-book-article--vertical p,
+  .md-book-article--vertical ul,
+  .md-book-article--vertical ol,
+  .md-book-article--vertical blockquote,
+  .md-book-article--vertical hr {
+    margin: 0;
+    margin-block-end: 1.25rem;
+  }
+
+  .md-book-article--vertical > :first-child {
+    margin-block-start: 0;
+  }
+
+  .md-book-article--vertical ul,
+  .md-book-article--vertical ol {
+    padding: 0;
+    padding-inline-start: 1.5rem;
+  }
+
+  .md-book-article--vertical blockquote {
+    padding: 0;
+    padding-inline: 0;
+    padding-block-start: 1.1rem;
+    border-left: none;
+    border-block-start: 2px solid var(--md-book-color-border);
+  }
+
+  .md-book-article--vertical hr {
+    border-top: none;
+    border-block-start: var(--md-book-border-width) solid var(--md-book-color-border);
+    margin-block: 2.5rem;
+  }
+
+  .md-book-article--vertical .md-book-anchor {
+    display: none;
+  }
+
+  /* Code and tables stay horizontal; they are wide and scroll on their own. */
+  .md-book-article--vertical pre,
+  .md-book-article--vertical table,
+  .md-book-article--vertical .md-book-code {
+    writing-mode: horizontal-tb;
+    inline-size: min(34rem, 80vw);
+    max-block-size: 100%;
+    overflow: auto;
+    letter-spacing: normal;
+  }
+
+  .md-book-article--vertical .md-book-code pre {
+    inline-size: auto;
   }
 }
 
@@ -1016,6 +1122,106 @@
   .md-book-container--details > summary {
     font-weight: 600;
     cursor: pointer;
+  }
+
+  /* --- tanka: a poem block; no card chrome, lines kept as written ------- */
+  .md-book-container--tanka,
+  .md-book-container--bare {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+  }
+
+  .md-book-container--bare::before {
+    display: none;
+  }
+
+  .md-book-container--tanka {
+    margin: 0 0 1.5rem;
+    font-family: var(--md-book-font-serif);
+    font-size: 1.2em;
+    line-height: 2.1;
+    letter-spacing: 0.1em;
+  }
+
+  .md-book-container--tanka::before {
+    display: none;
+  }
+
+  .md-book-container--tanka > .md-book-container__title {
+    color: var(--md-book-color-fg-muted);
+    font-size: 0.7em;
+    font-weight: 500;
+  }
+
+  /* `:::vertical` / `:::x.vertical`: a vertical (縦書き) block inside a horizontal
+     page — a fixed-height, right-to-left column set that scrolls sideways when
+     it outgrows the column. */
+  .md-book-container--vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-combine-upright: digits 2;
+    line-break: strict;
+    width: fit-content;
+    max-width: 100%;
+    max-height: var(--md-book-vertical-height);
+    margin-inline: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-family: var(--md-book-font-serif);
+    line-height: 2;
+    scrollbar-width: thin;
+  }
+
+  /* Containers inside a vertical article: badge moves to the top-right corner
+     (the start of a column) and spacing follows the right-to-left flow. */
+  .md-book-article--vertical .md-book-container,
+  .md-book-container--vertical {
+    margin: 0 0 0 1.25rem;
+    padding: 2.7rem 1.1rem 0.9rem 0.9rem;
+  }
+
+  .md-book-container--vertical {
+    margin: 0 auto 1.25rem;
+  }
+
+  .md-book-article--vertical .md-book-container::before,
+  .md-book-container--vertical::before {
+    left: auto;
+    right: 1rem;
+    top: 0.9rem;
+  }
+
+  .md-book-article--vertical .md-book-container__title,
+  .md-book-container--vertical > .md-book-container__title {
+    margin: 0 0 0 0.3rem;
+  }
+
+  .md-book-article--vertical .md-book-container--details,
+  .md-book-container--vertical.md-book-container--details {
+    padding: 0.9rem 1.1rem;
+  }
+
+  .md-book-container--vertical.md-book-container--tanka,
+  .md-book-container--vertical.md-book-container--bare {
+    padding: 0;
+  }
+
+  .md-book-article--vertical .md-book-container--tanka {
+    margin: 0 0 0 1.75rem;
+    padding: 0;
+  }
+
+  .md-book-article--vertical .md-book-container--bare {
+    padding: 0;
+  }
+
+  /* Already vertical: a nested vertical block just flows with the article. */
+  .md-book-article--vertical .md-book-container--vertical {
+    width: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   /* --- theme toggle ----------------------------------------------------- */

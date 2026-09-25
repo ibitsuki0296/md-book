@@ -95,6 +95,12 @@
     color: var(--md-book-color-fg-muted);
   }
 
+  /* Ruby readings stay light and unspaced even inside tracked-out poems. */
+  .md-book-article rt {
+    font-weight: 400;
+    letter-spacing: normal;
+  }
+
   .md-book-article :not(pre) > code {
     font-family: var(--md-book-font-mono);
     font-size: 0.86em;
@@ -234,5 +240,96 @@
     color: var(--md-book-color-fg-muted);
     border-top: var(--md-book-border-width) solid var(--md-book-color-border);
     margin-top: 2.5rem;
+  }
+  /* --- vertical writing (`writing: vertical`, 縦書き) ------------------------
+     The article becomes a fixed-height, sideways-scrolling column set: lines
+     run top to bottom and stack right to left. Physical margins/paddings from
+     the horizontal rules above are re-expressed for that flow. */
+  .md-book-article--vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-combine-upright: digits 2;
+    line-break: strict;
+    /* Orthogonal flow: width is the block size, so pin it to the column or it
+       grows with the content instead of scrolling. */
+    width: 100%;
+    height: var(--md-book-vertical-height);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+    font-family: var(--md-book-font-serif);
+    line-height: 2;
+    letter-spacing: 0.04em;
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-book-color-border) transparent;
+  }
+
+  .md-book-article--vertical h1,
+  .md-book-article--vertical h2,
+  .md-book-article--vertical h3,
+  .md-book-article--vertical h4 {
+    font-family: var(--md-book-font-serif);
+    letter-spacing: 0.1em;
+    text-wrap: initial;
+    margin: 0 0 0 1.25rem;
+  }
+
+  .md-book-article--vertical h2,
+  .md-book-article--vertical h3,
+  .md-book-article--vertical h4 {
+    margin-inline: 0;
+    margin-block: 2rem 0.75rem;
+  }
+
+  .md-book-article--vertical p,
+  .md-book-article--vertical ul,
+  .md-book-article--vertical ol,
+  .md-book-article--vertical blockquote,
+  .md-book-article--vertical hr {
+    margin: 0;
+    margin-block-end: 1.25rem;
+  }
+
+  .md-book-article--vertical > :first-child {
+    margin-block-start: 0;
+  }
+
+  .md-book-article--vertical ul,
+  .md-book-article--vertical ol {
+    padding: 0;
+    padding-inline-start: 1.5rem;
+  }
+
+  .md-book-article--vertical blockquote {
+    padding: 0;
+    padding-inline: 0;
+    padding-block-start: 1.1rem;
+    border-left: none;
+    border-block-start: 2px solid var(--md-book-color-border);
+  }
+
+  .md-book-article--vertical hr {
+    border-top: none;
+    border-block-start: var(--md-book-border-width) solid var(--md-book-color-border);
+    margin-block: 2.5rem;
+  }
+
+  .md-book-article--vertical .md-book-anchor {
+    display: none;
+  }
+
+  /* Code and tables stay horizontal; they are wide and scroll on their own. */
+  .md-book-article--vertical pre,
+  .md-book-article--vertical table,
+  .md-book-article--vertical .md-book-code {
+    writing-mode: horizontal-tb;
+    inline-size: min(34rem, 80vw);
+    max-block-size: 100%;
+    overflow: auto;
+    letter-spacing: normal;
+  }
+
+  .md-book-article--vertical .md-book-code pre {
+    inline-size: auto;
   }
 }

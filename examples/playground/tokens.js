@@ -15,6 +15,8 @@ export const FONT_STACKS = {
     '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif',
   'system-mono':
     '"JetBrains Mono", ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace',
+  'mincho':
+    '"Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", YuMincho, "Noto Serif JP", "Source Han Serif JP", "BIZ UDMincho", "MS PMincho", ui-serif, serif',
   georgia: 'Georgia, "Iowan Old Style", "Hiragino Mincho ProN", "Yu Mincho", serif',
   'ny-serif': 'ui-serif, "New York", Charter, "Iowan Old Style", Georgia, serif',
   'rounded-sans':
@@ -159,6 +161,13 @@ export const GROUPS = [
         type: 'font',
         options: [['system-mono', 'System mono']],
         light: FONT_STACKS['system-mono'],
+      },
+      {
+        token: 'font-serif',
+        label: 'Serif font (vertical / tanka)',
+        type: 'font',
+        options: [['mincho', 'Mincho']],
+        light: FONT_STACKS.mincho,
       },
       { token: 'text-base', label: 'Base size', type: 'range', unit: 'rem', min: 0.875, max: 1.25, step: 0.015625, light: 1 },
       { token: 'text-scale', label: 'Type scale ratio', type: 'range', unit: '', min: 1.1, max: 1.4, step: 0.01, light: 1.2 },

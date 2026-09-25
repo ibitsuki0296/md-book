@@ -17,6 +17,7 @@ const FILES: Record<string, string> = {
     '---\ntitle: Getting Started\n---\n# Getting Started\n\n## Install\n\nrun it\n\n## Usage\n\n```js\nconst x = 1;\n```\n',
   'home.md':
     '---\ntitle: Landing\nlayout: home\nhero:\n  text: Big idea\n  actions:\n    - text: Go\n      link: /guide/getting-started\nfeatures:\n  - title: Fast\n---\nbody text\n',
+  'vertical.md': '---\ntitle: Tanka\nwriting: vertical\n---\n:::tanka\na\nb\n:::\n',
   'blog/2026-02-01-hello.md': '---\ntitle: Hello\ndate: 2026-02-01\n---\n# Hello\n\npost body\n',
 };
 
@@ -216,6 +217,28 @@ describe('mount', () => {
     await new Promise((r) => setTimeout(r, 0));
     expect(root.classList.contains('md-book--home')).toBe(false);
     expect(host.querySelector('.md-book-hero')).toBeNull();
+    handle.destroy();
+  });
+
+  it('switches the article to vertical writing for writing: vertical', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const manifest = makeManifest();
+    manifest.entries.push(makeEntry('vertical.md', { title: 'Tanka' }));
+    const handle = await mount(host, { manifest, fetchText });
+    const root = host.querySelector('.md-book') as HTMLElement;
+    const article = host.querySelector('.md-book-article') as HTMLElement;
+
+    handle.navigate('/vertical');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(root.classList.contains('md-book--vertical')).toBe(true);
+    expect(article.classList.contains('md-book-article--vertical')).toBe(true);
+    expect(article.querySelector('.md-book-container--tanka br')).toBeTruthy();
+
+    handle.navigate('/guide/getting-started');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(root.classList.contains('md-book--vertical')).toBe(false);
+    expect(article.classList.contains('md-book-article--vertical')).toBe(false);
     handle.destroy();
   });
 

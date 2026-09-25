@@ -54,7 +54,8 @@ function makeAnchorToken(state: StateCore, id: string, text: string): Token {
 function renderInlineText(children: Token[]): string {
   let out = '';
   for (const child of children) {
-    if (child.type === 'text' || child.type === 'code_inline') out += child.content;
+    if (child.type === 'text' || child.type === 'code_inline' || child.type === 'md_book_ruby')
+      out += child.content;
     else if (child.type === 'softbreak' || child.type === 'hardbreak') out += ' ';
   }
   return out.trim();

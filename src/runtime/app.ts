@@ -2,6 +2,7 @@ import type { NavItem, PrevNext, RouteNode } from '../core/content.js';
 import type { UIStrings } from '../core/i18n.js';
 import type { TocEntry } from '../core/types.js';
 import { h, replaceChildren } from './dom.js';
+import { enableVerticalWheelScroll } from './enhance.js';
 import type { Router } from './router.js';
 
 export interface AppSite {
@@ -27,6 +28,8 @@ export interface PageState {
   prevNext: PrevNext;
   /** Front-matter `layout`; `home` switches to the full-width landing layout. */
   layout?: string;
+  /** Front-matter `writing`; `vertical` switches the article to 縦書き. */
+  writing?: string;
 }
 
 export interface App {
@@ -71,6 +74,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   const sidebar = h('aside', { class: 'md-book-sidebar', id: SIDEBAR_ID }, sidebarTop, sidebarNav);
 
   const article = h('article', { class: 'md-book-article' });
+  enableVerticalWheelScroll(article);
   const pager = h('nav', { class: 'md-book-pager', aria: { label: strings.pageNavLabel } });
   const pageFooter = h('footer', { class: 'md-book-page-footer' });
   applySlot(pageFooter, options.slots?.pageFooter);
@@ -124,8 +128,15 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     highlightCurrent(nav, router.current);
   };
 
+  const setVertical = (vertical: boolean) => {
+    root.classList.toggle('md-book--vertical', vertical);
+    article.classList.toggle('md-book-article--vertical', vertical);
+    article.scrollLeft = 0; // vertical-rl starts at the right edge (= the start of the text)
+  };
+
   const renderPage = (state: PageState) => {
     article.innerHTML = state.contentHTML;
+    setVertical(state.writing === 'vertical');
     replaceChildren(sidebarNav, renderSidebar(state.sidebar, router, state.path));
     replaceChildren(tocNav, ...renderToc(state.toc, router, strings));
     tocNav.hidden = state.toc.length === 0;
@@ -139,6 +150,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
 
   const renderMessage = (title: string, bodyText: string) => {
     root.classList.remove('md-book--home');
+    setVertical(false);
     article.replaceChildren(h('h1', {}, title), h('p', {}, bodyText));
     replaceChildren(pager);
     tocNav.hidden = true;

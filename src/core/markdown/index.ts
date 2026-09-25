@@ -5,10 +5,11 @@ import { highlightCode } from './highlight.js';
 import { anchorTocPlugin } from './plugins/anchor-toc.js';
 import { containersPlugin } from './plugins/containers.js';
 import { linkRewritePlugin } from './plugins/link-rewrite.js';
+import { rubyPlugin } from './plugins/ruby.js';
 
 export type MarkdownConfig = Pick<
   RenderOptions,
-  'allowHtml' | 'containers' | 'footnotes' | 'highlight' | 'linkRewrite'
+  'allowHtml' | 'containers' | 'footnotes' | 'highlight' | 'linkRewrite' | 'ruby'
 >;
 
 /**
@@ -31,6 +32,7 @@ export function createMarkdown(config: MarkdownConfig = {}): MarkdownIt {
 
   if (config.footnotes ?? true) md.use(footnote);
   if (config.containers ?? true) containersPlugin(md);
+  if (config.ruby ?? true) rubyPlugin(md);
   md.use(anchorTocPlugin);
   if (config.linkRewrite) linkRewritePlugin(md, config.linkRewrite);
 
