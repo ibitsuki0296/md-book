@@ -50,6 +50,8 @@ export interface FrontMatter {
   author?: string;
   /** Named layout hint consumed by the runtime/SSG layer. `home` enables `hero` / `features`. */
   layout?: string;
+  /** `vertical` renders the page in vertical writing mode (縦書き, e.g. for tanka). Default horizontal. */
+  writing?: 'horizontal' | 'vertical';
   /** Hero block, used when `layout: home`. */
   hero?: HomeHero;
   /** Feature cards, used when `layout: home`. */
@@ -78,6 +80,8 @@ export interface RenderOptions {
   tocDepth?: [number, number];
   /** Enable `:::note` / `:::warning` style container blocks. Default `true`. */
   containers?: boolean;
+  /** Enable `{漢字|かんじ}` ruby annotations. Default `true`. */
+  ruby?: boolean;
   /** Enable footnotes. Default `true`. */
   footnotes?: boolean;
   /**

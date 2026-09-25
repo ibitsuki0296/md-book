@@ -208,6 +208,7 @@ export async function mount(
         toc: page.toc,
         prevNext: getPrevNext(orderedPages, resolved),
         layout: page.frontMatter.layout,
+        writing: page.frontMatter.writing,
       });
 
       addCodeCopyButtons(app.article, t);

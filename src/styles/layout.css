@@ -107,6 +107,11 @@
     margin-inline: auto;
   }
 
+  /* Vertical writing: the article scrolls sideways, so let it use the full column. */
+  .md-book--vertical .md-book-main {
+    max-width: none;
+  }
+
   /* Tablet: drop the TOC rail. */
   @media (max-width: 1100px) {
     .md-book-body {

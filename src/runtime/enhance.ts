@@ -68,6 +68,29 @@ export async function applyHighlight(root: ParentNode, highlight: Highlighter): 
   );
 }
 
+/**
+ * In vertical-rl text the lines run right to left, so the page scrolls
+ * sideways. Mouse wheels only emit vertical deltas — map them onto the
+ * horizontal axis (down = forward = leftwards) while the element can still
+ * scroll that way, then let the page scroll normally at either end.
+ */
+export function enableVerticalWheelScroll(el: HTMLElement): void {
+  el.addEventListener(
+    'wheel',
+    (event) => {
+      if (!el.classList.contains('md-book-article--vertical')) return;
+      if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      const max = el.scrollWidth - el.clientWidth;
+      const forward = event.deltaY > 0;
+      // scrollLeft runs from 0 (right edge, start) down to -max (left edge, end).
+      if (max <= 0 || (forward ? el.scrollLeft <= -max + 1 : el.scrollLeft >= -1)) return;
+      event.preventDefault();
+      el.scrollLeft -= event.deltaY;
+    },
+    { passive: false },
+  );
+}
+
 export interface ScrollSpyOptions {
   /** The scrollable content element containing the headings. */
   content: ParentNode;

@@ -75,6 +75,9 @@
       "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
       "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
     --md-book-font-heading: var(--md-book-font-body);
+    /* Vertical writing (writing: vertical) and tanka read best in a mincho face. */
+    --md-book-font-serif: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", YuMincho,
+      "Noto Serif JP", "Source Han Serif JP", "BIZ UDMincho", "MS PMincho", ui-serif, serif;
     --md-book-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "SFMono-Regular", "Menlo",
       "Consolas", "Liberation Mono", monospace;
     --md-book-text-base: 1rem;
@@ -84,6 +87,7 @@
 
     /* --- layout & shape -------------------------------------------------- */
     --md-book-measure: 46rem;
+    --md-book-vertical-height: clamp(22rem, 72vh, 42rem);
     --md-book-content-max: 90rem;
     --md-book-sidebar-width: 16rem;
     --md-book-toc-width: 14rem;

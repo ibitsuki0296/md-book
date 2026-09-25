@@ -59,6 +59,49 @@ describe('renderMarkdown', () => {
     expect(html).toContain('<summary>More</summary>');
   });
 
+  it('keeps line breaks inside :::tanka and leaves other containers alone', () => {
+    const { html } = renderMarkdown(':::tanka 題\nline one\nline two\n:::\n\n:::note\na\nb\n:::');
+    expect(html).toContain('md-book-container--tanka');
+    expect(html).not.toContain('md-book-container--tanka" role');
+    expect(html).toContain('md-book-container__title">題');
+    expect(html).toContain('line one<br>\nline two');
+    expect(html).not.toContain('a<br>');
+    expect(html).toContain('a\nb');
+  });
+
+  it('renders {base|reading} as ruby and escapes both parts', () => {
+    const { html } = renderMarkdown('{漢字|かんじ}と{<b>|&}');
+    expect(html).toContain('<ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>');
+    expect(html).toContain('<ruby>&lt;b&gt;<rp>(</rp><rt>&amp;</rt><rp>)</rp></ruby>');
+  });
+
+  it('leaves malformed or code-wrapped ruby alone', () => {
+    const { html } = renderMarkdown('{a} {a|} {|b} {a|b|c} `{x|y}`');
+    expect(html).not.toContain('<ruby>');
+    expect(html).toContain('{a|b|c}');
+    expect(html).toContain('<code>{x|y}</code>');
+    expect(renderMarkdown('{漢字|かんじ}', { ruby: false }).html).not.toContain('<ruby>');
+  });
+
+  it('keeps ruby readable in heading ids and excerpts', () => {
+    const { headings, excerpt, html } = renderMarkdown('## {東海|とうかい}\n\n{小島|こじま}の磯\n');
+    expect(headings[0]?.text).toBe('東海');
+    expect(html).toContain('id="東海"');
+    expect(excerpt).toBe('小島の磯');
+  });
+
+  it('adds vertical writing to blocks via :::vertical and the .vertical modifier', () => {
+    const plain = renderMarkdown(':::vertical\nbody\n:::').html;
+    expect(plain).toContain('md-book-container--bare md-book-container--vertical');
+    expect(plain).not.toContain('role="note"');
+    const tanka = renderMarkdown(':::tanka.vertical 題\na\nb\n:::').html;
+    expect(tanka).toContain('md-book-container--tanka md-book-container--vertical');
+    expect(tanka).toContain('a<br>');
+    const note = renderMarkdown(':::note.vertical\nx\n:::').html;
+    expect(note).toContain('md-book-container--note md-book-container--vertical');
+    expect(renderMarkdown(':::note\nx\n:::').html).not.toContain('--vertical');
+  });
+
   it('rewrites relative .md links to route paths', () => {
     const { html } = renderMarkdown('[next](../guide/setup.md#install)', {
       linkRewrite: { currentPath: '/blog/intro', base: '/' },

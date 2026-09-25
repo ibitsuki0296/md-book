@@ -359,6 +359,106 @@
     cursor: pointer;
   }
 
+  /* --- tanka: a poem block; no card chrome, lines kept as written ------- */
+  .md-book-container--tanka,
+  .md-book-container--bare {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+  }
+
+  .md-book-container--bare::before {
+    display: none;
+  }
+
+  .md-book-container--tanka {
+    margin: 0 0 1.5rem;
+    font-family: var(--md-book-font-serif);
+    font-size: 1.2em;
+    line-height: 2.1;
+    letter-spacing: 0.1em;
+  }
+
+  .md-book-container--tanka::before {
+    display: none;
+  }
+
+  .md-book-container--tanka > .md-book-container__title {
+    color: var(--md-book-color-fg-muted);
+    font-size: 0.7em;
+    font-weight: 500;
+  }
+
+  /* `:::vertical` / `:::x.vertical`: a vertical (縦書き) block inside a horizontal
+     page — a fixed-height, right-to-left column set that scrolls sideways when
+     it outgrows the column. */
+  .md-book-container--vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-combine-upright: digits 2;
+    line-break: strict;
+    width: fit-content;
+    max-width: 100%;
+    max-height: var(--md-book-vertical-height);
+    margin-inline: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-family: var(--md-book-font-serif);
+    line-height: 2;
+    scrollbar-width: thin;
+  }
+
+  /* Containers inside a vertical article: badge moves to the top-right corner
+     (the start of a column) and spacing follows the right-to-left flow. */
+  .md-book-article--vertical .md-book-container,
+  .md-book-container--vertical {
+    margin: 0 0 0 1.25rem;
+    padding: 2.7rem 1.1rem 0.9rem 0.9rem;
+  }
+
+  .md-book-container--vertical {
+    margin: 0 auto 1.25rem;
+  }
+
+  .md-book-article--vertical .md-book-container::before,
+  .md-book-container--vertical::before {
+    left: auto;
+    right: 1rem;
+    top: 0.9rem;
+  }
+
+  .md-book-article--vertical .md-book-container__title,
+  .md-book-container--vertical > .md-book-container__title {
+    margin: 0 0 0 0.3rem;
+  }
+
+  .md-book-article--vertical .md-book-container--details,
+  .md-book-container--vertical.md-book-container--details {
+    padding: 0.9rem 1.1rem;
+  }
+
+  .md-book-container--vertical.md-book-container--tanka,
+  .md-book-container--vertical.md-book-container--bare {
+    padding: 0;
+  }
+
+  .md-book-article--vertical .md-book-container--tanka {
+    margin: 0 0 0 1.75rem;
+    padding: 0;
+  }
+
+  .md-book-article--vertical .md-book-container--bare {
+    padding: 0;
+  }
+
+  /* Already vertical: a nested vertical block just flows with the article. */
+  .md-book-article--vertical .md-book-container--vertical {
+    width: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   /* --- theme toggle ----------------------------------------------------- */
   .md-book-theme-toggle {
     display: inline-flex;

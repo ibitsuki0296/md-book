@@ -4,7 +4,16 @@ import type StateBlock from 'markdown-it/lib/rules_block/state_block.mjs';
 const MARKER = 0x3a; // ':'
 const MIN_MARKERS = 3;
 
-export const DEFAULT_CONTAINER_TYPES = ['note', 'tip', 'info', 'warning', 'danger', 'details'];
+export const DEFAULT_CONTAINER_TYPES = [
+  'note',
+  'tip',
+  'info',
+  'warning',
+  'danger',
+  'details',
+  'tanka',
+  'vertical',
+];
 
 export interface ContainerOptions {
   /** Allowed container names. Unknown names fall back to a generic block. */
@@ -21,6 +30,10 @@ export interface ContainerOptions {
  * ```
  *
  * `details` renders as a native `<details><summary>` disclosure.
+ * `tanka` is a poem block: line breaks inside it are kept (`<br>`), and the
+ * optional title is the poem's heading.
+ * `vertical` sets its content in vertical writing (縦書き) inside a horizontal
+ * page. Any container accepts the `.vertical` modifier — `:::tanka.vertical 題`.
  */
 export function containersPlugin(md: MarkdownIt, options: ContainerOptions = {}): void {
   const known = new Set(options.types ?? DEFAULT_CONTAINER_TYPES);
@@ -37,7 +50,8 @@ export function containersPlugin(md: MarkdownIt, options: ContainerOptions = {})
 
     const params = state.src.slice(pos, max).trim();
     const spaceIdx = params.search(/\s/);
-    const rawType = (spaceIdx === -1 ? params : params.slice(0, spaceIdx)).toLowerCase();
+    const head = (spaceIdx === -1 ? params : params.slice(0, spaceIdx)).toLowerCase();
+    const [rawType = '', ...modifiers] = head.split('.');
     const title = spaceIdx === -1 ? '' : params.slice(spaceIdx + 1).trim();
     if (rawType.length === 0) return false;
     if (silent) return true;
@@ -59,7 +73,7 @@ export function containersPlugin(md: MarkdownIt, options: ContainerOptions = {})
     tokenOpen.markup = ':'.repeat(markerCount);
     tokenOpen.block = true;
     tokenOpen.info = type;
-    tokenOpen.meta = { title };
+    tokenOpen.meta = { title, vertical: type === 'vertical' || modifiers.includes('vertical') };
     tokenOpen.map = [startLine, closeLine];
 
     state.md.block.tokenize(state, startLine + 1, closeLine);
@@ -71,10 +85,26 @@ export function containersPlugin(md: MarkdownIt, options: ContainerOptions = {})
     );
     tokenClose.markup = ':'.repeat(markerCount);
     tokenClose.block = true;
+    tokenClose.meta = { tanka: type === 'tanka' };
 
     state.parentType = oldParent;
     state.lineMax = oldLineMax;
     state.line = closeLine + (closeLine < endLine ? 1 : 0);
+    return true;
+  });
+
+  // Poems keep their line breaks: soft breaks inside `:::tanka` become `<br>`.
+  md.core.ruler.after('inline', 'md_book_tanka_breaks', (state) => {
+    let depth = 0;
+    for (const token of state.tokens) {
+      if (token.type === 'md_book_container_open' && token.info === 'tanka') depth++;
+      else if (token.type === 'md_book_container_close' && token.meta?.tanka) depth--;
+      else if (depth > 0 && token.type === 'inline') {
+        for (const child of token.children ?? []) {
+          if (child.type === 'softbreak') child.type = 'hardbreak';
+        }
+      }
+    }
     return true;
   });
 
@@ -87,7 +117,17 @@ export function containersPlugin(md: MarkdownIt, options: ContainerOptions = {})
       return `<details class="md-book-container md-book-container--details">\n<summary>${escapeHtml(summary)}</summary>\n`;
     }
     const heading = title ? `<p class="md-book-container__title">${escapeHtml(title)}</p>\n` : '';
-    return `<div class="md-book-container md-book-container--${type}" role="note">\n${heading}`;
+    const vertical = Boolean(token.meta?.vertical);
+    const role = type === 'tanka' || type === 'vertical' ? '' : ' role="note"';
+    // `:::vertical` is a bare (chrome-less) block; the modifier adds the class to any type.
+    const classes = [
+      'md-book-container',
+      `md-book-container--${type === 'vertical' ? 'bare' : type}`,
+      vertical ? 'md-book-container--vertical' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    return `<div class="${classes}"${role}>\n${heading}`;
   };
 
   md.renderer.rules.md_book_container_close = (tokens, idx) => {
