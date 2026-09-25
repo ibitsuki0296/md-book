@@ -88,9 +88,10 @@ It builds the shell (skip link, header nav, sidebar, content, TOC rail, prev/nex
 pager, footer), runs a History-API (or `hash`) client router that intercepts
 internal links and prefetches on hover, fetches + renders each page through the
 core, adds copy buttons to code blocks, tracks the active heading for the TOC,
-and keeps `<title>` / `meta[description]` in sync. Pass `highlight: (code, lang)
-=> html` to plug in a syntax highlighter, and `locale: 'ja'` to localise the
-generated UI (see [Internationalisation](#internationalisation-implemented-now)).
+and keeps `<title>` / `meta[description]` in sync. Fenced code gets built-in
+syntax highlighting (js/ts, json, css, html, sh, yaml, python, diff); pass
+`highlight: (code, lang) => html` to plug in a fuller highlighter, and
+`locale: 'ja'` to localise the generated UI (see [Internationalisation](#internationalisation-implemented-now)).
 
 Run the example site (`examples/docs/`):
 

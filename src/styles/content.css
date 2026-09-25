@@ -14,6 +14,8 @@
     font-family: var(--md-book-font-heading);
     line-height: var(--md-book-leading-heading);
     font-weight: 650;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
     scroll-margin-top: calc(var(--md-book-header-height) + 1rem);
   }
 
@@ -22,33 +24,33 @@
       var(--md-book-text-base) *
       var(--md-book-text-scale) *
       var(--md-book-text-scale) *
-      1.35
+      1.55
     );
-    margin: 0 0 1rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
   }
 
   .md-book-article h2 {
-    font-size: calc(var(--md-book-text-base) * var(--md-book-text-scale) * 1.35);
-    margin: 2.5rem 0 1rem;
-    padding-bottom: 0.3rem;
-    border-bottom: var(--md-book-border-width) solid var(--md-book-color-border);
+    font-size: calc(var(--md-book-text-base) * var(--md-book-text-scale) * 1.25);
+    margin: 3rem 0 0.9rem;
   }
 
   .md-book-article h3 {
     font-size: calc(var(--md-book-text-base) * var(--md-book-text-scale));
-    margin: 2rem 0 0.75rem;
+    margin: 2.25rem 0 0.6rem;
   }
 
   .md-book-article h4 {
     font-size: var(--md-book-text-base);
-    margin: 1.5rem 0 0.5rem;
+    margin: 1.75rem 0 0.5rem;
   }
 
   .md-book-article p,
   .md-book-article ul,
   .md-book-article ol,
   .md-book-article blockquote {
-    margin: 0 0 1.15rem;
+    margin: 0 0 1.25rem;
   }
 
   .md-book-article ul,
@@ -60,30 +62,59 @@
     margin-top: 0.35rem;
   }
 
+  .md-book-article li::marker {
+    color: var(--md-book-color-fg-muted);
+  }
+
+  .md-book-article strong {
+    font-weight: 650;
+  }
+
+  /* Prose links: quiet underline that firms up on hover. */
+  .md-book-article p a,
+  .md-book-article li a,
+  .md-book-article td a,
+  .md-book-article blockquote a {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--md-book-color-accent) 35%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color var(--md-book-transition);
+  }
+
+  .md-book-article p a:hover,
+  .md-book-article li a:hover,
+  .md-book-article td a:hover,
+  .md-book-article blockquote a:hover {
+    text-decoration-color: currentColor;
+  }
+
   .md-book-article blockquote {
-    padding: 0.25rem 0 0.25rem 1rem;
-    border-left: 3px solid var(--md-book-color-border);
+    padding: 0.15rem 0 0.15rem 1.1rem;
+    border-left: 2px solid var(--md-book-color-border);
     color: var(--md-book-color-fg-muted);
   }
 
   .md-book-article :not(pre) > code {
     font-family: var(--md-book-font-mono);
-    font-size: 0.9em;
+    font-size: 0.86em;
     background: var(--md-book-color-inline-code-bg);
-    padding: 0.15em 0.4em;
+    padding: 0.18em 0.42em;
     border-radius: var(--md-book-radius-sm);
   }
 
   .md-book-article pre {
     font-family: var(--md-book-font-mono);
-    font-size: 0.875rem;
-    line-height: 1.6;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    tab-size: 2;
     background: var(--md-book-color-code-bg);
     color: var(--md-book-color-code-fg);
-    padding: 1rem;
+    padding: 1.1rem 1.25rem;
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
     border-radius: var(--md-book-radius);
     overflow-x: auto;
-    margin: 0 0 1.15rem;
+    margin: 0 0 1.25rem;
   }
 
   .md-book-article pre code {
@@ -92,29 +123,92 @@
     font-size: inherit;
   }
 
+  /* --- syntax highlighting (core/markdown/highlight.ts) ------------------ */
+  .md-book-tok-comment {
+    color: var(--md-book-color-tok-comment);
+    font-style: italic;
+  }
+  .md-book-tok-keyword {
+    color: var(--md-book-color-tok-keyword);
+  }
+  .md-book-tok-string {
+    color: var(--md-book-color-tok-string);
+  }
+  .md-book-tok-number,
+  .md-book-tok-literal {
+    color: var(--md-book-color-tok-number);
+  }
+  .md-book-tok-function {
+    color: var(--md-book-color-tok-function);
+  }
+  .md-book-tok-type {
+    color: var(--md-book-color-tok-type);
+  }
+  .md-book-tok-attr {
+    color: var(--md-book-color-tok-attr);
+  }
+  .md-book-tok-inserted {
+    color: color-mix(in srgb, var(--md-book-color-tip) 70%, var(--md-book-color-fg));
+    background: color-mix(in srgb, var(--md-book-color-tip) 12%, transparent);
+  }
+  .md-book-tok-deleted {
+    color: color-mix(in srgb, var(--md-book-color-danger) 70%, var(--md-book-color-fg));
+    background: color-mix(in srgb, var(--md-book-color-danger) 12%, transparent);
+  }
+
+  /* --- tables: a bordered card with hairline row dividers ---------------- */
   .md-book-article table {
     width: 100%;
-    border-collapse: collapse;
-    margin: 0 0 1.15rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0 0 1.25rem;
     font-size: 0.925rem;
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
+    border-radius: var(--md-book-radius);
+  }
+
+  /* Round the corner cells rather than clip: wide tables must stay visible. */
+  .md-book-article thead tr:first-child th:first-child {
+    border-top-left-radius: calc(var(--md-book-radius) - var(--md-book-border-width));
+  }
+  .md-book-article thead tr:first-child th:last-child {
+    border-top-right-radius: calc(var(--md-book-radius) - var(--md-book-border-width));
+  }
+  .md-book-article tbody tr:last-child td:first-child {
+    border-bottom-left-radius: calc(var(--md-book-radius) - var(--md-book-border-width));
+  }
+  .md-book-article tbody tr:last-child td:last-child {
+    border-bottom-right-radius: calc(var(--md-book-radius) - var(--md-book-border-width));
   }
 
   .md-book-article th,
   .md-book-article td {
-    border: var(--md-book-border-width) solid var(--md-book-color-border);
-    padding: 0.5rem 0.75rem;
+    border-bottom: var(--md-book-border-width) solid var(--md-book-color-border);
+    padding: 0.6rem 0.9rem;
     text-align: left;
+    vertical-align: top;
+  }
+
+  .md-book-article tbody tr:last-child td {
+    border-bottom: none;
   }
 
   .md-book-article th {
     background: var(--md-book-color-surface);
+    color: var(--md-book-color-fg-muted);
+    font-size: 0.8rem;
     font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .md-book-article tbody tr:hover td {
+    background: var(--md-book-color-surface);
   }
 
   .md-book-article hr {
     border: none;
     border-top: var(--md-book-border-width) solid var(--md-book-color-border);
-    margin: 2rem 0;
+    margin: 2.5rem 0;
   }
 
   .md-book-heading {

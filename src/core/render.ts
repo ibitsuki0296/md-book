@@ -20,6 +20,7 @@ export function renderMarkdown(source: string, options: RenderOptions = {}): Ren
     allowHtml: options.allowHtml,
     containers: options.containers,
     footnotes: options.footnotes,
+    highlight: options.highlight,
     linkRewrite: options.linkRewrite,
   });
 

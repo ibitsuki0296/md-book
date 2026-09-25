@@ -26,6 +26,7 @@ export interface UIStrings {
   sidebarLabel: string;
   pageNavLabel: string;
   onThisPageLabel: string;
+  menuLabel: string;
   previous: string;
   next: string;
 
@@ -70,6 +71,7 @@ const en: UIStrings = {
   sidebarLabel: 'Sidebar',
   pageNavLabel: 'Page navigation',
   onThisPageLabel: 'On this page',
+  menuLabel: 'Menu',
   previous: 'Previous',
   next: 'Next',
 
@@ -110,6 +112,7 @@ const ja: UIStrings = {
   sidebarLabel: 'サイドバー',
   pageNavLabel: 'ページ送り',
   onThisPageLabel: 'このページの内容',
+  menuLabel: 'メニュー',
   previous: '前へ',
   next: '次へ',
 
