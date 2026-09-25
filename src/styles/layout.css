@@ -5,24 +5,31 @@
     z-index: 10;
     display: flex;
     align-items: center;
-    gap: var(--md-book-gutter);
+    gap: 1.25rem;
     height: var(--md-book-header-height);
     padding-inline: var(--md-book-gutter);
-    background: color-mix(in srgb, var(--md-book-color-bg) 88%, transparent);
-    backdrop-filter: blur(8px);
+    background: color-mix(in srgb, var(--md-book-color-bg) 80%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
     border-bottom: var(--md-book-border-width) solid var(--md-book-color-border);
   }
 
   .md-book-brand {
-    font-weight: 700;
+    font-weight: 650;
     font-size: 1.05rem;
+    letter-spacing: -0.02em;
     color: var(--md-book-color-fg);
+  }
+
+  .md-book-brand:hover {
+    color: var(--md-book-color-fg);
+    text-decoration: none;
   }
 
   .md-book-nav {
     display: flex;
-    gap: 1.25rem;
+    gap: 0.25rem;
     flex: 1;
+    min-width: 0;
   }
 
   .md-book-navbar-end {
@@ -34,19 +41,26 @@
   .md-book-body {
     display: grid;
     grid-template-columns: var(--md-book-sidebar-width) minmax(0, 1fr) var(--md-book-toc-width);
-    gap: var(--md-book-gutter);
+    gap: calc(var(--md-book-gutter) * 1.5);
     max-width: var(--md-book-content-max);
     margin-inline: auto;
-    padding: var(--md-book-gutter);
+    padding: calc(var(--md-book-gutter) * 1.25) var(--md-book-gutter)
+      calc(var(--md-book-gutter) * 3);
   }
 
-  .md-book-sidebar {
+  .md-book-sidebar,
+  .md-book-toc {
     position: sticky;
     top: calc(var(--md-book-header-height) + var(--md-book-gutter));
     align-self: start;
     max-height: calc(100vh - var(--md-book-header-height) - var(--md-book-gutter) * 2);
     overflow-y: auto;
-    font-size: 0.925rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-book-color-border) transparent;
+  }
+
+  .md-book-sidebar {
+    font-size: 0.9rem;
   }
 
   .md-book-main {
@@ -59,16 +73,38 @@
   }
 
   .md-book-toc {
-    position: sticky;
-    top: calc(var(--md-book-header-height) + var(--md-book-gutter));
-    align-self: start;
-    max-height: calc(100vh - var(--md-book-header-height) - var(--md-book-gutter) * 2);
-    overflow-y: auto;
     font-size: 0.85rem;
   }
 
   .md-book-toc[hidden] {
     display: none;
+  }
+
+  .md-book-backdrop {
+    display: none;
+  }
+
+  /* Landing page (`layout: home`): no sidebar / TOC / pager, wider column. */
+  .md-book--home .md-book-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .md-book--home .md-book-sidebar,
+  .md-book--home .md-book-toc,
+  .md-book--home .md-book-pager {
+    display: none;
+  }
+
+  .md-book--home .md-book-main {
+    max-width: 64rem;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  /* Prose below the hero keeps the normal reading measure. */
+  .md-book--home .md-book-article > :not(.md-book-hero, .md-book-features) {
+    max-width: var(--md-book-measure);
+    margin-inline: auto;
   }
 
   /* Tablet: drop the TOC rail. */
@@ -81,18 +117,73 @@
     }
   }
 
-  /* Mobile: single column, sidebar becomes a disclosure. */
+  /* Mobile: single column; the sidebar becomes an off-canvas drawer opened by
+     the header's menu button (`.is-menu-open` on the root, see runtime/app.ts). */
   @media (max-width: 760px) {
+    .md-book-header {
+      gap: 0.5rem;
+      padding-inline: 1rem;
+    }
+
+    /* Long nav lists scroll sideways instead of colliding with navbar-end. */
+    .md-book-nav {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .md-book-nav__link {
+      flex: none;
+    }
+
+    .md-book-navbar-end {
+      flex: none;
+      gap: 0.5rem;
+    }
+
     .md-book-body {
       grid-template-columns: minmax(0, 1fr);
-      padding: 1rem;
+      padding: 1.5rem 1rem 3rem;
     }
+
     .md-book-sidebar {
-      position: static;
+      position: fixed;
+      top: var(--md-book-header-height);
+      bottom: 0;
+      left: 0;
+      z-index: 15;
+      align-self: stretch;
+      width: min(20rem, 86vw);
       max-height: none;
-      border-bottom: var(--md-book-border-width) solid var(--md-book-color-border);
-      padding-bottom: 1rem;
-      margin-bottom: 1rem;
+      padding: 1.25rem 1rem 2rem;
+      background: var(--md-book-color-bg);
+      border-right: var(--md-book-border-width) solid var(--md-book-color-border);
+      box-shadow: var(--md-book-shadow);
+      overscroll-behavior: contain;
+      transform: translateX(-100%);
+      visibility: hidden;
+      transition: transform 200ms ease, visibility 0s linear 200ms;
+    }
+
+    .is-menu-open .md-book-sidebar {
+      transform: none;
+      visibility: visible;
+      transition: transform 200ms ease;
+    }
+
+    .md-book-backdrop {
+      display: block;
+      position: fixed;
+      inset: var(--md-book-header-height) 0 0 0;
+      z-index: 14;
+      background: color-mix(in srgb, var(--md-book-color-fg) 35%, transparent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .is-menu-open .md-book-backdrop {
+      opacity: 1;
+      pointer-events: auto;
     }
   }
 }

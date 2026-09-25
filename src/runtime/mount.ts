@@ -7,6 +7,7 @@ import {
   flattenPages,
   getPrevNext,
 } from '../core/content.js';
+import { renderHome } from '../core/home.js';
 import { type UIStrings, createStrings } from '../core/i18n.js';
 import { type SlotContent, createApp } from './app.js';
 import { BLOG_DEFAULTS, type BlogRuntimeConfig, resolveBlogView } from './blog.js';
@@ -199,10 +200,14 @@ export async function mount(
       app.renderPage({
         path: resolved,
         title: page.frontMatter.title ?? entryTitle(page.entry),
-        contentHTML: page.html,
+        contentHTML:
+          page.frontMatter.layout === 'home'
+            ? `${renderHome(page.frontMatter, (link) => router.href(link))}\n${page.html}`
+            : page.html,
         sidebar: buildSidebar(manifest.entries, { section: sidebarSection }),
         toc: page.toc,
         prevNext: getPrevNext(orderedPages, resolved),
+        layout: page.frontMatter.layout,
       });
 
       addCodeCopyButtons(app.article, t);

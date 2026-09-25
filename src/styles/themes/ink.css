@@ -22,6 +22,7 @@
   --md-book-leading: 1.75;
   --md-book-measure: 42rem;
   --md-book-radius: 0.25rem;
+  --md-book-radius-sm: 0.2rem;
 }
 
 :root[data-theme="dark"] {

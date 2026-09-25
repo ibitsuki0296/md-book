@@ -20,30 +20,50 @@ theme is a single `.css` file that redefines them — load it **after**
 :root {
   /* colour */
   --md-book-color-bg: #ffffff;
-  --md-book-color-fg: #23272f;
-  --md-book-color-fg-muted: #6b7280;
-  --md-book-color-surface: #f7f8fa;
-  --md-book-color-border: #dde0e7;
-  --md-book-color-accent: #2563eb;
+  --md-book-color-fg: #18181c;
+  --md-book-color-fg-muted: #6f6f7b;
+  --md-book-color-surface: #fafafa;
+  --md-book-color-border: #e7e7ea;
+  --md-book-color-accent: #4f46e5;
   --md-book-color-accent-fg: #ffffff;
-  --md-book-color-code-bg: #eceef2;
+  --md-book-color-code-bg: #fafafa;
+
+  /* syntax highlighting */
+  --md-book-color-tok-keyword: #7c3aed;
+  --md-book-color-tok-string: #047857;
+  --md-book-color-tok-function: #2563eb;
 
   /* typography */
-  --md-book-font-body: ui-sans-serif, system-ui, sans-serif;
-  --md-book-font-mono: ui-monospace, Menlo, Consolas, monospace;
+  --md-book-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --md-book-font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
   --md-book-leading: 1.7;
 
   /* layout */
   --md-book-measure: 46rem;       /* reading width   */
   --md-book-sidebar-width: 16rem;
   --md-book-toc-width: 14rem;
-  --md-book-radius: 0.5rem;
+  --md-book-radius: 0.75rem;
 }
 ```
 
 `themes/default.css` in the package lists every token with its default value —
 copy it as a starting point. The primitive palette (`--md-book-gray-*`,
 `--md-book-brand-*`) is also overridable if you want to recolour in one place.
+
+## Fonts
+
+md-book never downloads fonts itself. The default stacks list **Inter** and
+**JetBrains Mono** first, so loading them (a `<link>` to Google Fonts, or
+self-hosted `@font-face`) is enough; without them the platform UI font is used.
+
+## Syntax highlighting
+
+Fenced code in `js`/`ts`, `json`, `css`, `html`, `bash`, `yaml`, `python` and
+`diff` is highlighted at render time by a tiny built-in tokenizer, coloured with
+the `--md-book-color-tok-*` tokens. Other languages stay plain. For full-grammar
+highlighting pass `highlight: (code, lang) => html` to `mount()` (Shiki,
+highlight.js, …), or set `highlight: false` on `renderMarkdown()` to switch the
+built-in one off.
 
 ## Dark mode
 
@@ -52,10 +72,10 @@ with no theme file, dark is also applied from `prefers-color-scheme`.
 
 ```css
 :root[data-theme="dark"] {
-  --md-book-color-bg: #14161b;
-  --md-book-color-fg: #eceef2;
-  --md-book-color-border: #363b48;
-  --md-book-color-accent: #6ea8fe;
+  --md-book-color-bg: #0a0a0d;
+  --md-book-color-fg: #f4f4f5;
+  --md-book-color-border: #26262d;
+  --md-book-color-accent: #818cf8;
 }
 ```
 

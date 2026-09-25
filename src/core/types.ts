@@ -3,6 +3,35 @@
  * Nothing in this file may import DOM or Node APIs.
  */
 
+/** A call-to-action button in the home-page hero. */
+export interface HomeAction {
+  text: string;
+  /** Route path (`/guide/intro`), `#hash`, or an absolute URL. */
+  link: string;
+  /** `brand` (filled, default for the first action) or `alt` (outlined). */
+  theme?: 'brand' | 'alt';
+}
+
+/** Hero block for `layout: home` pages. */
+export interface HomeHero {
+  /** Small eyebrow / product name, rendered as the page's `<h1>`. */
+  name?: string;
+  /** Large headline. */
+  text?: string;
+  tagline?: string;
+  actions?: HomeAction[];
+}
+
+/** One feature card on a `layout: home` page. */
+export interface HomeFeature {
+  title: string;
+  details?: string;
+  /** Short glyph or emoji shown in the card's badge. */
+  icon?: string;
+  /** Makes the whole card a link. */
+  link?: string;
+}
+
 /** Raw front matter as parsed from a page's YAML block. */
 export interface FrontMatter {
   title?: string;
@@ -19,8 +48,12 @@ export interface FrontMatter {
   slug?: string;
   cover?: string;
   author?: string;
-  /** Named layout hint consumed by the runtime/SSG layer. */
+  /** Named layout hint consumed by the runtime/SSG layer. `home` enables `hero` / `features`. */
   layout?: string;
+  /** Hero block, used when `layout: home`. */
+  hero?: HomeHero;
+  /** Feature cards, used when `layout: home`. */
+  features?: HomeFeature[];
   [key: string]: unknown;
 }
 
@@ -47,6 +80,11 @@ export interface RenderOptions {
   containers?: boolean;
   /** Enable footnotes. Default `true`. */
   footnotes?: boolean;
+  /**
+   * Built-in syntax highlighting for fenced code (js/ts, json, css, html, sh,
+   * yaml, python, diff). Default `true`. Unknown languages stay plain.
+   */
+  highlight?: boolean;
   /**
    * Rewrites links so that `./foo.md` and `../bar/baz.md` become route paths.
    * `currentPath` is the route path of the page being rendered (e.g. `/guide/intro`).

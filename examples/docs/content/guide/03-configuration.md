@@ -67,3 +67,41 @@ md-book manifest <contentDir> --base / --title "My Docs"
 md-book feed <contentDir> --site-url https://example.com/ --formats rss,atom
 md-book dev --root . --content ./content --port 4173
 ```
+
+## Landing page
+
+Set `layout: home` in a page's front matter to get a full-width landing page
+(no sidebar, TOC or pager) with a hero and feature cards. The Markdown body is
+rendered below them, so leave out the `# h1` — `hero.name` becomes the page's
+`<h1>`.
+
+```yaml
+---
+title: My project
+layout: home
+hero:
+  name: v1.0
+  text: A headline that sells it
+  tagline: One supporting sentence with `code` if you like.
+  actions:
+    - text: Get started
+      link: /guide/getting-started   # route path, #hash or absolute URL
+    - text: GitHub
+      link: https://github.com/you/project
+      theme: alt                      # brand (default for the first) | alt
+features:
+  - icon: "✎"
+    title: Just Markdown
+    details: Short description.
+    link: /guide/showcase             # optional: makes the card a link
+---
+```
+
+Only `http(s):`, `mailto:`, `#hash` and in-site paths are accepted as links.
+
+## Sidebar order
+
+Siblings sort by `order` (or a numeric `NN-` filename prefix), then by `date`
+newest first, then by title. Blog posts therefore appear newest first without any
+extra configuration.
+

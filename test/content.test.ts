@@ -140,6 +140,28 @@ describe('buildNav', () => {
   });
 });
 
+describe('sibling ordering by date', () => {
+  it('sorts dated pages newest first, after explicit order, before title', () => {
+    const entries = [
+      e('blog/2025-01-01-a.md', { title: 'A', date: '2025-01-01' }),
+      e('blog/2026-03-01-c.md', { title: 'C', date: '2026-03-01' }),
+      e('blog/2025-06-01-b.md', { title: 'B', date: '2025-06-01' }),
+      e('blog/undated.md', { title: 'Undated' }),
+      e('blog/03-pinned.md', { title: 'Pinned', date: '2020-01-01' }),
+    ];
+    const blog = buildSidebar(entries).find((n) => n.segment === 'blog');
+    expect(blog?.children.map((c) => c.title)).toEqual(['Pinned', 'C', 'B', 'A', 'Undated']);
+  });
+
+  it('accepts Date values from YAML', () => {
+    const entries = [
+      e('blog/a.md', { title: 'A', date: new Date('2025-01-01') as unknown as string }),
+      e('blog/b.md', { title: 'B', date: new Date('2026-01-01') as unknown as string }),
+    ];
+    expect(buildSidebar(entries, { section: '/blog' }).map((n) => n.title)).toEqual(['B', 'A']);
+  });
+});
+
 describe('buildSidebar', () => {
   const entries = [
     e('guide/01-intro.md', { title: 'Intro' }),

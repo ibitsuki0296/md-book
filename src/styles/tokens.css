@@ -14,22 +14,22 @@
   :root {
     /* --- primitives: raw palette ------------------------------------- */
     --md-book-gray-0: #ffffff;
-    --md-book-gray-50: #f7f8fa;
-    --md-book-gray-100: #eceef2;
-    --md-book-gray-200: #dde0e7;
-    --md-book-gray-300: #c3c8d2;
-    --md-book-gray-400: #9aa1af;
-    --md-book-gray-500: #6b7280;
-    --md-book-gray-600: #4b5160;
-    --md-book-gray-700: #363b48;
-    --md-book-gray-800: #23272f;
-    --md-book-gray-900: #14161b;
-    --md-book-gray-950: #0c0d11;
+    --md-book-gray-50: #fafafa;
+    --md-book-gray-100: #f4f4f5;
+    --md-book-gray-200: #e7e7ea;
+    --md-book-gray-300: #d1d1d6;
+    --md-book-gray-400: #a0a0ab;
+    --md-book-gray-500: #6f6f7b;
+    --md-book-gray-600: #52525e;
+    --md-book-gray-700: #3a3a44;
+    --md-book-gray-800: #26262d;
+    --md-book-gray-900: #18181c;
+    --md-book-gray-950: #0a0a0d;
 
-    --md-book-brand-400: #6ea8fe;
-    --md-book-brand-500: #3b82f6;
-    --md-book-brand-600: #2563eb;
-    --md-book-brand-700: #1d4ed8;
+    --md-book-brand-400: #818cf8;
+    --md-book-brand-500: #6366f1;
+    --md-book-brand-600: #4f46e5;
+    --md-book-brand-700: #4338ca;
 
     --md-book-blue-500: #3b82f6;
     --md-book-green-500: #16a34a;
@@ -38,7 +38,7 @@
 
     /* --- semantic tokens ------------------------------------------------ */
     --md-book-color-bg: var(--md-book-gray-0);
-    --md-book-color-fg: var(--md-book-gray-800);
+    --md-book-color-fg: var(--md-book-gray-900);
     --md-book-color-fg-muted: var(--md-book-gray-500);
     --md-book-color-surface: var(--md-book-gray-50);
     --md-book-color-surface-hover: var(--md-book-gray-100);
@@ -47,10 +47,19 @@
     --md-book-color-accent-hover: var(--md-book-brand-700);
     --md-book-color-accent-fg: var(--md-book-gray-0);
     --md-book-color-accent-muted: color-mix(in srgb, var(--md-book-brand-600) 12%, transparent);
-    --md-book-color-code-bg: var(--md-book-gray-100);
+    --md-book-color-code-bg: var(--md-book-gray-50);
     --md-book-color-code-fg: var(--md-book-gray-800);
-    --md-book-color-inline-code-bg: color-mix(in srgb, var(--md-book-brand-600) 10%, transparent);
+    --md-book-color-inline-code-bg: color-mix(in srgb, var(--md-book-gray-500) 13%, transparent);
     --md-book-color-selection: color-mix(in srgb, var(--md-book-brand-500) 28%, transparent);
+
+    /* Syntax highlighting (built-in highlighter; a custom one can reuse these). */
+    --md-book-color-tok-comment: var(--md-book-gray-500);
+    --md-book-color-tok-keyword: #7c3aed;
+    --md-book-color-tok-string: #047857;
+    --md-book-color-tok-number: #b45309;
+    --md-book-color-tok-function: #2563eb;
+    --md-book-color-tok-type: #be185d;
+    --md-book-color-tok-attr: #0e7490;
 
     --md-book-color-note: var(--md-book-blue-500);
     --md-book-color-tip: var(--md-book-green-500);
@@ -59,15 +68,19 @@
     --md-book-admonition-bg-mix: 8%;
 
     /* --- typography --------------------------------------------------- */
-    --md-book-font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    /* Inter / JetBrains Mono win when the page loads or has them installed;
+       otherwise the platform UI font is used. */
+    --md-book-font-body:
+      "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable",
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+      "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
     --md-book-font-heading: var(--md-book-font-body);
-    --md-book-font-mono: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas",
-      "Liberation Mono", monospace;
+    --md-book-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "SFMono-Regular", "Menlo",
+      "Consolas", "Liberation Mono", monospace;
     --md-book-text-base: 1rem;
     --md-book-text-scale: 1.2;
     --md-book-leading: 1.7;
-    --md-book-leading-heading: 1.25;
+    --md-book-leading-heading: 1.2;
 
     /* --- layout & shape -------------------------------------------------- */
     --md-book-measure: 46rem;
@@ -76,10 +89,10 @@
     --md-book-toc-width: 14rem;
     --md-book-header-height: 3.5rem;
     --md-book-gutter: 2rem;
-    --md-book-radius: 0.5rem;
-    --md-book-radius-sm: 0.25rem;
+    --md-book-radius: 0.75rem;
+    --md-book-radius-sm: 0.375rem;
     --md-book-border-width: 1px;
-    --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.06);
+    --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05);
     --md-book-transition: 150ms ease;
     --md-book-focus-ring: 2px solid var(--md-book-color-accent);
   }
@@ -92,14 +105,21 @@
       --md-book-color-fg-muted: var(--md-book-gray-400);
       --md-book-color-surface: var(--md-book-gray-900);
       --md-book-color-surface-hover: var(--md-book-gray-800);
-      --md-book-color-border: var(--md-book-gray-700);
+      --md-book-color-border: var(--md-book-gray-800);
       --md-book-color-accent: var(--md-book-brand-400);
-      --md-book-color-accent-hover: #9dc2ff;
+      --md-book-color-accent-hover: #a5b4fc;
       --md-book-color-accent-fg: var(--md-book-gray-950);
       --md-book-color-code-bg: var(--md-book-gray-900);
       --md-book-color-code-fg: var(--md-book-gray-100);
       --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.45);
-      --md-book-admonition-bg-mix: 16%;
+      --md-book-color-tok-comment: var(--md-book-gray-400);
+      --md-book-color-tok-keyword: #a78bfa;
+      --md-book-color-tok-string: #34d399;
+      --md-book-color-tok-number: #fbbf24;
+      --md-book-color-tok-function: #60a5fa;
+      --md-book-color-tok-type: #f472b6;
+      --md-book-color-tok-attr: #22d3ee;
+      --md-book-admonition-bg-mix: 12%;
     }
   }
 
@@ -110,13 +130,20 @@
     --md-book-color-fg-muted: var(--md-book-gray-400);
     --md-book-color-surface: var(--md-book-gray-900);
     --md-book-color-surface-hover: var(--md-book-gray-800);
-    --md-book-color-border: var(--md-book-gray-700);
+    --md-book-color-border: var(--md-book-gray-800);
     --md-book-color-accent: var(--md-book-brand-400);
-    --md-book-color-accent-hover: #9dc2ff;
+    --md-book-color-accent-hover: #a5b4fc;
     --md-book-color-accent-fg: var(--md-book-gray-950);
     --md-book-color-code-bg: var(--md-book-gray-900);
     --md-book-color-code-fg: var(--md-book-gray-100);
     --md-book-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.45);
-    --md-book-admonition-bg-mix: 16%;
+    --md-book-color-tok-comment: var(--md-book-gray-400);
+    --md-book-color-tok-keyword: #a78bfa;
+    --md-book-color-tok-string: #34d399;
+    --md-book-color-tok-number: #fbbf24;
+    --md-book-color-tok-function: #60a5fa;
+    --md-book-color-tok-type: #f472b6;
+    --md-book-color-tok-attr: #22d3ee;
+    --md-book-admonition-bg-mix: 12%;
   }
 }

@@ -12,9 +12,9 @@
 /** Curated font stacks offered in the typography selects. */
 export const FONT_STACKS = {
   'system-sans':
-    'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif',
+    '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif',
   'system-mono':
-    'ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace',
+    '"JetBrains Mono", ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace',
   georgia: 'Georgia, "Iowan Old Style", "Hiragino Mincho ProN", "Yu Mincho", serif',
   'ny-serif': 'ui-serif, "New York", Charter, "Iowan Old Style", Georgia, serif',
   'rounded-sans':
@@ -29,7 +29,7 @@ const INHERIT_BODY = 'var(--md-book-font-body)';
 export const SHADOWS = {
   none: 'none',
   subtle: '0 1px 2px rgb(0 0 0 / 0.04)',
-  default: '0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.06)',
+  default: '0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05)',
   elevated: '0 2px 4px rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.14)',
 };
 const SHADOWS_DARK = {
@@ -51,10 +51,10 @@ export const GROUPS = [
     note: 'Accent, links, focus ring, selection and inline-code all derive from these four shades.',
     scope: 'shared',
     fields: [
-      { token: 'brand-400', label: 'Brand 400 (dark-mode accent)', type: 'color', light: '#6ea8fe' },
-      { token: 'brand-500', label: 'Brand 500', type: 'color', light: '#3b82f6' },
-      { token: 'brand-600', label: 'Brand 600 (accent)', type: 'color', light: '#2563eb' },
-      { token: 'brand-700', label: 'Brand 700 (accent hover)', type: 'color', light: '#1d4ed8' },
+      { token: 'brand-400', label: 'Brand 400 (dark-mode accent)', type: 'color', light: '#818cf8' },
+      { token: 'brand-500', label: 'Brand 500', type: 'color', light: '#6366f1' },
+      { token: 'brand-600', label: 'Brand 600 (accent)', type: 'color', light: '#4f46e5' },
+      { token: 'brand-700', label: 'Brand 700 (accent hover)', type: 'color', light: '#4338ca' },
     ],
   },
   {
@@ -63,12 +63,12 @@ export const GROUPS = [
     note: 'Edited per mode — switch the Light / Dark toggle above to set each.',
     scope: 'mode',
     fields: [
-      { token: 'color-bg', label: 'Background', type: 'color', light: '#ffffff', dark: '#0c0d11' },
-      { token: 'color-fg', label: 'Text', type: 'color', light: '#23272f', dark: '#eceef2' },
-      { token: 'color-fg-muted', label: 'Muted text', type: 'color', light: '#6b7280', dark: '#9aa1af' },
-      { token: 'color-surface', label: 'Surface', type: 'color', light: '#f7f8fa', dark: '#14161b' },
-      { token: 'color-surface-hover', label: 'Surface (hover)', type: 'color', light: '#eceef2', dark: '#23272f' },
-      { token: 'color-border', label: 'Border', type: 'color', light: '#dde0e7', dark: '#363b48' },
+      { token: 'color-bg', label: 'Background', type: 'color', light: '#ffffff', dark: '#0a0a0d' },
+      { token: 'color-fg', label: 'Text', type: 'color', light: '#18181c', dark: '#f4f4f5' },
+      { token: 'color-fg-muted', label: 'Muted text', type: 'color', light: '#6f6f7b', dark: '#a0a0ab' },
+      { token: 'color-surface', label: 'Surface', type: 'color', light: '#fafafa', dark: '#18181c' },
+      { token: 'color-surface-hover', label: 'Surface (hover)', type: 'color', light: '#f4f4f5', dark: '#26262d' },
+      { token: 'color-border', label: 'Border', type: 'color', light: '#e7e7ea', dark: '#26262d' },
     ],
   },
   {
@@ -78,11 +78,26 @@ export const GROUPS = [
     scope: 'mode',
     advanced: true,
     fields: [
-      { token: 'color-accent', label: 'Accent', type: 'color', light: '#2563eb', dark: '#6ea8fe', optional: true },
-      { token: 'color-accent-hover', label: 'Accent (hover)', type: 'color', light: '#1d4ed8', dark: '#9dc2ff', optional: true },
-      { token: 'color-accent-fg', label: 'Accent foreground', type: 'color', light: '#ffffff', dark: '#0c0d11', optional: true },
-      { token: 'color-code-bg', label: 'Code block bg', type: 'color', light: '#eceef2', dark: '#14161b', optional: true },
-      { token: 'color-code-fg', label: 'Code block text', type: 'color', light: '#23272f', dark: '#eceef2', optional: true },
+      { token: 'color-accent', label: 'Accent', type: 'color', light: '#4f46e5', dark: '#818cf8', optional: true },
+      { token: 'color-accent-hover', label: 'Accent (hover)', type: 'color', light: '#4338ca', dark: '#a5b4fc', optional: true },
+      { token: 'color-accent-fg', label: 'Accent foreground', type: 'color', light: '#ffffff', dark: '#0a0a0d', optional: true },
+      { token: 'color-code-bg', label: 'Code block bg', type: 'color', light: '#fafafa', dark: '#18181c', optional: true },
+      { token: 'color-code-fg', label: 'Code block text', type: 'color', light: '#26262d', dark: '#f4f4f5', optional: true },
+    ],
+  },
+  {
+    id: 'syntax',
+    label: 'Syntax highlighting',
+    note: 'Colours for the built-in code highlighter.',
+    scope: 'mode',
+    fields: [
+      { token: 'color-tok-comment', label: 'Comment', type: 'color', light: '#6f6f7b', dark: '#a0a0ab' },
+      { token: 'color-tok-keyword', label: 'Keyword', type: 'color', light: '#7c3aed', dark: '#a78bfa' },
+      { token: 'color-tok-string', label: 'String', type: 'color', light: '#047857', dark: '#34d399' },
+      { token: 'color-tok-number', label: 'Number / literal', type: 'color', light: '#b45309', dark: '#fbbf24' },
+      { token: 'color-tok-function', label: 'Function', type: 'color', light: '#2563eb', dark: '#60a5fa' },
+      { token: 'color-tok-type', label: 'Type / tag', type: 'color', light: '#be185d', dark: '#f472b6' },
+      { token: 'color-tok-attr', label: 'Property / attribute', type: 'color', light: '#0e7490', dark: '#22d3ee' },
     ],
   },
   {
@@ -103,7 +118,7 @@ export const GROUPS = [
         max: 28,
         step: 1,
         light: 8,
-        dark: 16,
+        dark: 12,
       },
     ],
   },
@@ -148,7 +163,7 @@ export const GROUPS = [
       { token: 'text-base', label: 'Base size', type: 'range', unit: 'rem', min: 0.875, max: 1.25, step: 0.015625, light: 1 },
       { token: 'text-scale', label: 'Type scale ratio', type: 'range', unit: '', min: 1.1, max: 1.4, step: 0.01, light: 1.2 },
       { token: 'leading', label: 'Body line-height', type: 'range', unit: '', min: 1.4, max: 2, step: 0.05, light: 1.7 },
-      { token: 'leading-heading', label: 'Heading line-height', type: 'range', unit: '', min: 1.05, max: 1.5, step: 0.05, light: 1.25 },
+      { token: 'leading-heading', label: 'Heading line-height', type: 'range', unit: '', min: 1.05, max: 1.5, step: 0.05, light: 1.2 },
     ],
   },
   {
@@ -162,8 +177,8 @@ export const GROUPS = [
       { token: 'toc-width', label: 'TOC width', type: 'range', unit: 'rem', min: 0, max: 20, step: 0.5, light: 14 },
       { token: 'gutter', label: 'Gutter', type: 'range', unit: 'rem', min: 0.5, max: 4, step: 0.25, light: 2 },
       { token: 'header-height', label: 'Header height', type: 'range', unit: 'rem', min: 2.75, max: 5, step: 0.25, light: 3.5 },
-      { token: 'radius', label: 'Radius', type: 'range', unit: 'rem', min: 0, max: 1.5, step: 0.0625, light: 0.5 },
-      { token: 'radius-sm', label: 'Radius (small)', type: 'range', unit: 'rem', min: 0, max: 1, step: 0.0625, light: 0.25 },
+      { token: 'radius', label: 'Radius', type: 'range', unit: 'rem', min: 0, max: 1.5, step: 0.0625, light: 0.75 },
+      { token: 'radius-sm', label: 'Radius (small)', type: 'range', unit: 'rem', min: 0, max: 1, step: 0.0625, light: 0.375 },
       { token: 'border-width', label: 'Border width', type: 'range', unit: 'px', min: 0, max: 4, step: 1, light: 1 },
       {
         token: 'shadow',

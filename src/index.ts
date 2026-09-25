@@ -27,6 +27,7 @@ export {
   orderFromFilename,
   resolveRoutes,
 } from './core/content.js';
+export { type HrefResolver, renderHome } from './core/home.js';
 export { type FeedFormat, type FeedOptions, generateFeed } from './core/feed.js';
 export {
   createStrings,
@@ -47,11 +48,15 @@ export type {
 } from './core/content.js';
 export { createMarkdown } from './core/markdown/index.js';
 export type { MarkdownConfig } from './core/markdown/index.js';
+export { highlightCode } from './core/markdown/highlight.js';
 export { buildToc } from './core/markdown/plugins/anchor-toc.js';
 export { DEFAULT_CONTAINER_TYPES } from './core/markdown/plugins/containers.js';
 export { renderMarkdown } from './core/render.js';
 export type {
   FrontMatter,
+  HomeAction,
+  HomeFeature,
+  HomeHero,
   RenderOptions,
   RenderResult,
   TocEntry,

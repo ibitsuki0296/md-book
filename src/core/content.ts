@@ -245,12 +245,28 @@ function sortTree(node: RouteNode): void {
   for (const child of node.children) sortTree(child);
 }
 
+/** Sibling order: explicit `order`, then newest `date` first (blog posts), then title. */
 function compareNodes(a: RouteNode, b: RouteNode): number {
   const ao = a.order ?? Number.POSITIVE_INFINITY;
   const bo = b.order ?? Number.POSITIVE_INFINITY;
   if (ao !== bo) return ao - bo;
+  const ad = dateKey(a);
+  const bd = dateKey(b);
+  if (ad !== bd) return ad - bd;
   const byTitle = a.title.localeCompare(b.title);
   return byTitle !== 0 ? byTitle : a.segment.localeCompare(b.segment);
+}
+
+/** Negated timestamp so newer sorts first; undated nodes sort after dated ones. */
+function dateKey(node: RouteNode): number {
+  const raw: unknown = node.entry?.frontMatter.date; // YAML may yield a Date
+  const time =
+    raw instanceof Date
+      ? raw.getTime()
+      : typeof raw === 'string' || typeof raw === 'number'
+        ? new Date(raw).getTime()
+        : Number.NaN;
+  return Number.isNaN(time) ? Number.POSITIVE_INFINITY : -time;
 }
 
 function findNode(root: RouteNode, path: string): RouteNode | undefined {

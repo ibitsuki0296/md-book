@@ -12,25 +12,36 @@
 
 :root {
   /* Palette primitives — remap these to recolour everything at once. */
-  --md-book-brand-500: #3b82f6;
-  --md-book-brand-600: #2563eb;
-  --md-book-brand-700: #1d4ed8;
+  --md-book-brand-500: #6366f1;
+  --md-book-brand-600: #4f46e5;
+  --md-book-brand-700: #4338ca;
 
   /* Semantic colour */
   --md-book-color-bg: #ffffff;
-  --md-book-color-fg: #23272f;
-  --md-book-color-fg-muted: #6b7280;
-  --md-book-color-surface: #f7f8fa;
-  --md-book-color-surface-hover: #eceef2;
-  --md-book-color-border: #dde0e7;
+  --md-book-color-fg: #18181c;
+  --md-book-color-fg-muted: #6f6f7b;
+  --md-book-color-surface: #fafafa;
+  --md-book-color-surface-hover: #f4f4f5;
+  --md-book-color-border: #e7e7ea;
   --md-book-color-accent: var(--md-book-brand-600);
   --md-book-color-accent-hover: var(--md-book-brand-700);
   --md-book-color-accent-fg: #ffffff;
+  --md-book-color-code-bg: #fafafa;
+  --md-book-color-code-fg: #26262d;
+
+  /* Syntax highlighting */
+  --md-book-color-tok-comment: #6f6f7b;
+  --md-book-color-tok-keyword: #7c3aed;
+  --md-book-color-tok-string: #047857;
+  --md-book-color-tok-number: #b45309;
+  --md-book-color-tok-function: #2563eb;
+  --md-book-color-tok-type: #be185d;
+  --md-book-color-tok-attr: #0e7490;
 
   /* Typography */
-  --md-book-font-body: ui-sans-serif, system-ui, sans-serif;
+  --md-book-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --md-book-font-heading: var(--md-book-font-body);
-  --md-book-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --md-book-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --md-book-text-base: 1rem;
   --md-book-leading: 1.7;
 
@@ -38,5 +49,6 @@
   --md-book-measure: 46rem;
   --md-book-sidebar-width: 16rem;
   --md-book-toc-width: 14rem;
-  --md-book-radius: 0.5rem;
+  --md-book-radius: 0.75rem;
+  --md-book-radius-sm: 0.375rem;
 }

@@ -1,13 +1,14 @@
 import MarkdownIt from 'markdown-it';
 import footnote from 'markdown-it-footnote';
 import type { RenderOptions } from '../types.js';
+import { highlightCode } from './highlight.js';
 import { anchorTocPlugin } from './plugins/anchor-toc.js';
 import { containersPlugin } from './plugins/containers.js';
 import { linkRewritePlugin } from './plugins/link-rewrite.js';
 
 export type MarkdownConfig = Pick<
   RenderOptions,
-  'allowHtml' | 'containers' | 'footnotes' | 'linkRewrite'
+  'allowHtml' | 'containers' | 'footnotes' | 'highlight' | 'linkRewrite'
 >;
 
 /**
@@ -22,6 +23,8 @@ export function createMarkdown(config: MarkdownConfig = {}): MarkdownIt {
     linkify: true,
     typographer: true,
     breaks: false,
+    // Empty string → markdown-it falls back to plain escaped code.
+    highlight: (config.highlight ?? true) ? (code, lang) => highlightCode(code, lang) : undefined,
   });
 
   md.enable(['strikethrough', 'table']);

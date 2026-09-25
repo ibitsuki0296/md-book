@@ -15,6 +15,8 @@ const FILES: Record<string, string> = {
   'index.md': '---\ntitle: Home\n---\n# Home\n\nGo to the [guide](./guide/getting-started.md).\n',
   'guide/01-getting-started.md':
     '---\ntitle: Getting Started\n---\n# Getting Started\n\n## Install\n\nrun it\n\n## Usage\n\n```js\nconst x = 1;\n```\n',
+  'home.md':
+    '---\ntitle: Landing\nlayout: home\nhero:\n  text: Big idea\n  actions:\n    - text: Go\n      link: /guide/getting-started\nfeatures:\n  - title: Fast\n---\nbody text\n',
   'blog/2026-02-01-hello.md': '---\ntitle: Hello\ndate: 2026-02-01\n---\n# Hello\n\npost body\n',
 };
 
@@ -188,6 +190,72 @@ describe('mount', () => {
       'Usage',
     ]);
     expect(host.querySelector('.md-book-code')).toBeTruthy();
+    handle.destroy();
+  });
+
+  it('renders the hero and full-width layout for layout: home', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const manifest = makeManifest();
+    manifest.entries.push(makeEntry('home.md', { title: 'Landing', layout: 'home' }));
+    const handle = await mount(host, { manifest, fetchText });
+    const root = host.querySelector('.md-book') as HTMLElement;
+
+    handle.navigate('/home');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(root.classList.contains('md-book--home')).toBe(true);
+    expect(host.querySelector('.md-book-hero__text')?.textContent).toBe('Big idea');
+    expect(host.querySelector('.md-book-hero__action')?.getAttribute('href')).toBe(
+      '/guide/getting-started',
+    );
+    expect(host.querySelector('.md-book-feature__title')?.textContent).toBe('Fast');
+    expect(host.querySelector('.md-book-article')?.textContent).toContain('body text');
+    expect((host.querySelector('.md-book-menu-toggle') as HTMLElement).hidden).toBe(true);
+
+    handle.navigate('/guide/getting-started');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(root.classList.contains('md-book--home')).toBe(false);
+    expect(host.querySelector('.md-book-hero')).toBeNull();
+    handle.destroy();
+  });
+
+  it('titles the TOC rail', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, { manifest: makeManifest(), fetchText });
+    handle.navigate('/guide/getting-started');
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(host.querySelector('.md-book-toc__title')?.textContent).toBe('On this page');
+    handle.destroy();
+  });
+
+  it('opens and closes the mobile sidebar drawer', async () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = await mount(host, { manifest: makeManifest(), fetchText });
+    const root = host.querySelector('.md-book') as HTMLElement;
+    const button = host.querySelector('.md-book-menu-toggle') as HTMLButtonElement;
+    const sidebar = host.querySelector('.md-book-sidebar') as HTMLElement;
+
+    expect(button.getAttribute('aria-controls')).toBe(sidebar.id);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+
+    button.click();
+    expect(root.classList.contains('is-menu-open')).toBe(true);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(root.classList.contains('is-menu-open')).toBe(false);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+
+    button.click();
+    (host.querySelector('.md-book-backdrop') as HTMLElement).click();
+    expect(root.classList.contains('is-menu-open')).toBe(false);
+
+    button.click();
+    (sidebar.querySelector('a') as HTMLAnchorElement).click();
+    expect(root.classList.contains('is-menu-open')).toBe(false);
     handle.destroy();
   });
 

@@ -25,6 +25,8 @@ export interface PageState {
   sidebar: RouteNode[];
   toc: TocEntry[];
   prevNext: PrevNext;
+  /** Front-matter `layout`; `home` switches to the full-width landing layout. */
+  layout?: string;
 }
 
 export interface App {
@@ -41,6 +43,7 @@ export interface App {
 }
 
 const CONTENT_ID = 'md-book-content';
+const SIDEBAR_ID = 'md-book-sidebar';
 
 /** Builds the app shell once; subsequent calls update regions in place. */
 export function createApp(target: HTMLElement, options: AppOptions): App {
@@ -51,7 +54,13 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   const navbarEnd = h('div', { class: 'md-book-navbar-end' });
   applySlot(navbarEnd, options.slots?.navbarEnd);
 
-  const header = h('header', { class: 'md-book-header' }, brand, nav, navbarEnd);
+  // Below the tablet breakpoint the sidebar is an off-canvas drawer (see layout.css).
+  const menuButton = h('button', {
+    class: 'md-book-menu-toggle',
+    type: 'button',
+    aria: { label: strings.menuLabel, expanded: 'false', controls: SIDEBAR_ID },
+  });
+  const header = h('header', { class: 'md-book-header' }, menuButton, brand, nav, navbarEnd);
 
   const sidebarTop = h('div', { class: 'md-book-sidebar__top' });
   applySlot(sidebarTop, options.slots?.sidebarTop);
@@ -59,7 +68,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     class: 'md-book-sidebar__nav',
     aria: { label: strings.sidebarLabel },
   });
-  const sidebar = h('aside', { class: 'md-book-sidebar' }, sidebarTop, sidebarNav);
+  const sidebar = h('aside', { class: 'md-book-sidebar', id: SIDEBAR_ID }, sidebarTop, sidebarNav);
 
   const article = h('article', { class: 'md-book-article' });
   const pager = h('nav', { class: 'md-book-pager', aria: { label: strings.pageNavLabel } });
@@ -76,15 +85,34 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   const tocNav = h('nav', { class: 'md-book-toc', aria: { label: strings.onThisPageLabel } });
 
   const body = h('div', { class: 'md-book-body' }, sidebar, content, tocNav);
+  const backdrop = h('div', { class: 'md-book-backdrop', aria: { hidden: 'true' } });
   const root = h(
     'div',
     { class: 'md-book' },
     h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, strings.skipToContent),
     header,
+    backdrop,
     body,
   );
 
   target.replaceChildren(root);
+
+  const setMenu = (open: boolean, moveFocus = true) => {
+    if (root.classList.contains('is-menu-open') === open) return;
+    root.classList.toggle('is-menu-open', open);
+    menuButton.setAttribute('aria-expanded', String(open));
+    if (!moveFocus) return;
+    if (open) sidebar.querySelector<HTMLElement>('a')?.focus();
+    else menuButton.focus();
+  };
+  menuButton.addEventListener('click', () => setMenu(!root.classList.contains('is-menu-open')));
+  backdrop.addEventListener('click', () => setMenu(false, false));
+  root.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setMenu(false);
+  });
+  sidebar.addEventListener('click', (event) => {
+    if ((event.target as Element).closest('a')) setMenu(false, false);
+  });
 
   const renderNav = (items: NavItem[]) => {
     replaceChildren(
@@ -99,13 +127,18 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   const renderPage = (state: PageState) => {
     article.innerHTML = state.contentHTML;
     replaceChildren(sidebarNav, renderSidebar(state.sidebar, router, state.path));
-    replaceChildren(tocNav, ...renderToc(state.toc, router));
+    replaceChildren(tocNav, ...renderToc(state.toc, router, strings));
     tocNav.hidden = state.toc.length === 0;
+    const home = state.layout === 'home';
+    root.classList.toggle('md-book--home', home);
+    menuButton.hidden = home || state.sidebar.length === 0;
+    setMenu(false, false);
     replaceChildren(pager, ...renderPager(state.prevNext, router, strings));
     highlightCurrent(nav, router.current);
   };
 
   const renderMessage = (title: string, bodyText: string) => {
+    root.classList.remove('md-book--home');
     article.replaceChildren(h('h1', {}, title), h('p', {}, bodyText));
     replaceChildren(pager);
     tocNav.hidden = true;
@@ -153,7 +186,7 @@ function renderSidebar(nodes: RouteNode[], router: Router, currentPath: string):
   return list;
 }
 
-function renderToc(entries: TocEntry[], router: Router): HTMLElement[] {
+function renderToc(entries: TocEntry[], router: Router, strings: UIStrings): HTMLElement[] {
   if (entries.length === 0) return [];
   const build = (list: TocEntry[]): HTMLElement => {
     const ul = h('ul', { class: 'md-book-toc__list' });
@@ -176,7 +209,7 @@ function renderToc(entries: TocEntry[], router: Router): HTMLElement[] {
     }
     return ul;
   };
-  return [build(entries)];
+  return [h('p', { class: 'md-book-toc__title' }, strings.onThisPageLabel), build(entries)];
 }
 
 function renderPager(prevNext: PrevNext, router: Router, strings: UIStrings): HTMLElement[] {
