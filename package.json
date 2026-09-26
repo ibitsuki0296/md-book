@@ -87,6 +87,7 @@
     "format": "biome format --write .",
     "validate:tokens": "node scripts/validate-tokens.mjs",
     "size": "size-limit",
+    "version": "changeset version && node scripts/sync-version.mjs && biome format --write package.json",
     "release": "npm run build && changeset publish",
     "prepare": "lefthook install || true",
     "example": "npm run build && cp dist/md-book.global.js dist/style.css examples/docs/ && node dist/cli.mjs dev --root examples/docs --content examples/docs/content --locales en,ja --port 4173",
