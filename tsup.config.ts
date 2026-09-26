@@ -26,6 +26,7 @@ export default defineConfig([
     target: 'es2022',
     platform: 'neutral',
     noExternal: cjsNoExternal,
+    metafile: true,
     outExtension: ({ format }) => ext(format),
   },
   // Node API + framework adapters (Vite / Astro / Next): Node-only, ESM + CJS.
@@ -83,6 +84,9 @@ export default defineConfig([
     target: 'es2020',
     platform: 'browser',
     noExternal: [/.*/],
+    // Lets postbuild list the bundled packages for dist/THIRD_PARTY_LICENSES.txt.
+    metafile: true,
+    banner: { js: '/*! md-book | MIT | bundled third-party licenses: THIRD_PARTY_LICENSES.txt */' },
     outExtension() {
       return { js: '.js' };
     },

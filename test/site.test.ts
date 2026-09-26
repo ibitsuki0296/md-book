@@ -187,6 +187,20 @@ describe('buildSite', () => {
     expect(read('guide/a/index.html')).toContain('md-book-math--rendered"><b>x^2</b>');
   });
 
+  it("ships the bundle's third-party licences next to the runtime when present", async () => {
+    writeFileSync(join(dist, 'THIRD_PARTY_LICENSES.txt'), 'licences');
+    const withRuntime = await buildSite({ contentDir: content, outDir: out, distDir: dist });
+    expect(withRuntime.files).toContain('THIRD_PARTY_LICENSES.txt');
+    expect(read('THIRD_PARTY_LICENSES.txt')).toBe('licences');
+    const plain = await buildSite({
+      contentDir: content,
+      outDir: join(root, 'plain'),
+      distDir: dist,
+      runtime: false,
+    });
+    expect(plain.files).not.toContain('THIRD_PARTY_LICENSES.txt');
+  });
+
   it('can emit plain static HTML without the runtime', async () => {
     const { files } = await buildSite({
       contentDir: content,
