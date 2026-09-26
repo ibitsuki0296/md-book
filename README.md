@@ -3,13 +3,15 @@
 Runtime-first Markdown **documentation & blog** library with token-based theming.
 
 Write content in Markdown, drop in a `manifest.json`, and render a full docs/blog
-site in the browser — no build step required. A static-site (SSG) mode and
-framework adapters come later; the core is deliberately pure so both layers can
-share it.
+site in the browser — no build step required. Or run `md-book build` for a
+pre-rendered static site (SSG), or plug the content pipeline into Vite, Astro or
+Next.js. The core is deliberately pure, so the runtime, the SSG and the adapters
+all share it.
 
-> **Status: 0.1.0.** Core rendering, the content model + CLI, the browser
-> runtime, token theming, blog, and SEO metadata are implemented and tested
-> (114 tests). Next: a static-build (SSG) mode and framework adapters.
+> **Status: 0.1.0 published; unreleased on `main`:** UI i18n, the design refresh,
+> vertical writing, and — new — a static-build (SSG) mode, Vite / Astro / Next
+> adapters, client-side full-text search, KaTeX math, Mermaid diagrams and
+> content-level i18n (locale routing). All implemented and tested.
 
 ## Why "md-book"
 
@@ -62,7 +64,9 @@ npx md-book manifest ./content --base /          # writes content/manifest.json
 npx md-book dev --root . --content ./content     # static server + live reload + /manifest.json
 ```
 
-Pure helpers for laying out a site: `resolveRoutes` (flat entries → route tree),
+Add `--locales en,ja` for a multi-language site
+([Content i18n](#content-i18n-locale-routing)), and `md-book search-index` for the
+search box ([Search](#search)). Pure helpers for laying out a site: `resolveRoutes` (flat entries → route tree),
 `buildNav`, `buildSidebar` (section-scoped, draft-aware), `flattenPages` +
 `getPrevNext`, and `assertManifest` for validating a fetched manifest.
 
@@ -199,8 +203,157 @@ import {
 } from '@ibitsuki0296/md-book';
 ```
 
-Add a locale by extending `src/core/i18n.ts`. Translating page **content**
-(locale routing, per-locale manifests) is not in scope yet.
+Add a UI language by extending `src/core/i18n.ts`. To translate page **content**,
+see [Content i18n](#content-i18n-locale-routing) below.
+
+## Search
+
+A full-text search box in the header, built from a JSON index — no server and no
+extra dependency. Japanese (and any language without spaces) works because it
+matches normalised substrings rather than words; full-width / half-width forms
+are unified and every term must match (AND).
+
+```bash
+npx md-book search-index ./content            # -> content/search-index.json
+```
+
+```html
+<md-book manifest="/manifest.json" search></md-book>     <!-- or mount({ search: true }) -->
+```
+
+`search` looks for `search-index.json` next to the manifest (`search="/x.json"` /
+`search: { url, limit }` to override). The index is fetched the first time someone
+types; press `/` or `Ctrl`/`⌘`+`K` to focus the box. Results show the page, the
+matching section heading and a highlighted snippet, and follow the current locale
+on localised sites. `md-book dev` serves `/search-index.json` live.
+
+Core: `extractSearchDoc`, `createSearchIndex`, `createSearcher` (all pure);
+runtime: `createSearchBox`. Tune the index with `--max-chars` (body text kept per
+page, default 8000).
+
+## Math & diagrams
+
+Both are opt-in and load their library **lazily, only on pages that use them**
+— nothing is added to the bundle.
+
+```html
+<md-book manifest="/manifest.json" math mermaid></md-book>
+```
+
+- **Math** (KaTeX): `$inline$` and `$$display$$` (single- or multi-line). Pandoc-style
+  delimiting keeps prose like "costs $5 and $10" untouched. Escaped TeX is emitted
+  in `.md-book-math` elements until KaTeX typesets it.
+- **Diagrams** (Mermaid): fence a block with <code>```mermaid</code>. Rendered with
+  `securityLevel: 'strict'` and redrawn when the light/dark theme changes.
+
+By default the ES builds are imported from jsDelivr. To self-host or bundle, pass
+your own loader:
+
+```ts
+await mount('#app', {
+  math:    { load: () => import('katex'), katex: { macros: { '\\R': '\\mathbb{R}' } } },
+  mermaid: { load: () => import('mermaid'), config: { flowchart: { htmlLabels: false } } },
+});
+```
+
+(Under a strict CSP, self-host and allow the script/style origins you use.) In the
+core, `renderMarkdown(src, { math: true | { render }, mermaid: true })` — pass
+`render: (tex, display) => katex.renderToString(tex, { displayMode: display })`
+to typeset at render time, which is what `md-book build --math` does when `katex`
+is installed in your project.
+
+## Content i18n (locale routing)
+
+Serve a site in several languages. The **default locale lives at the content root**
+and every other locale in a directory named after its code:
+
+```
+content/guide/intro.md      →  /guide/intro       (en, default)
+content/ja/guide/intro.md   →  /ja/guide/intro    (ja)
+content/ja/index.md         →  /ja                (ja home)
+```
+
+```bash
+npx md-book manifest ./content --locales en,ja                 # or en:English,ja:日本語
+npx md-book dev --content ./content --locales en,ja
+```
+
+The manifest records `locales` / `defaultLocale` (and `entry.locale`), so the
+runtime needs no extra configuration. Then, per route:
+
+- the UI language, `<html lang>` and `og:locale` follow the page's locale;
+- nav, sidebar, prev/next, blog routes (`/ja/blog`, `/ja/tags`) and search are
+  scoped to that locale;
+- a language switcher appears in the header and jumps to the **same page** in the
+  other language, or to that locale's home when it has no translation;
+- translated pages get `<link rel="alternate" hreflang>` (plus `x-default`).
+
+Give each locale its own title with `{ code: 'ja', label: '日本語', title: '…' }`
+(`mount({ locales })` or the manifest). Directory sections show their folder name
+in the nav; add an `index.md` with a `title` to a section to name it. For feeds use
+`md-book feed … --dir ja/blog --out …` (or `md-book build`, which writes one per
+locale).
+
+## Static build (SSG)
+
+`md-book build` pre-renders every route to real HTML — app shell, content, TOC,
+pager, canonical / Open Graph / hreflang / JSON-LD — for crawlers, link previews
+and no-JS readers. The pages still carry the runtime, which takes over on load, so
+client-side navigation, search and the theme toggle keep working.
+
+```bash
+npx md-book build ./content --out dist-site \
+  --site-url https://example.com/ --locales en,ja --blog --search --math --mermaid
+```
+
+The output contains `index.html` for each route (plus blog pages, tags,
+categories and a `404.html` that doubles as an SPA fallback), `manifest.json`,
+`search-index.json`, `sitemap.xml`, blog feeds, the raw Markdown, and
+`md-book.global.js` / `style.css` / `themes/`. Serve it from any static host; for a
+project-page deployment add `--base /repo/` and make `--site-url` include it.
+`--head <file>` injects extra `<head>` HTML (fonts, analytics), `--theme` sets the
+default theme, `--no-runtime` emits plain HTML + CSS only. It refuses to write
+inside the content directory. Draft and future-dated content follows the same
+rules as the runtime (future-dated posts are evaluated at build time).
+
+Programmatic: `import { buildSite, renderSite } from '@ibitsuki0296/md-book/node'`.
+`renderSite` is pure (sources in, `{ file, html }[]` out); the shell it emits is
+kept in lock-step with the runtime's DOM by a parity test.
+
+## Framework adapters
+
+Feed the content pipeline into an existing app. Each adapter generates
+`manifest.json`, `search-index.json` and the raw Markdown (base-aware, live in
+dev, emitted on build) — you mount `<md-book>` / `mount()` in your own page and
+import `@ibitsuki0296/md-book/style.css`.
+
+```ts
+// vite.config.ts
+import { mdBook } from '@ibitsuki0296/md-book/vite';
+export default defineConfig({ plugins: [mdBook({ contentDir: 'content' })] });
+// also: import manifest from 'virtual:md-book/manifest'
+```
+
+```js
+// astro.config.mjs
+import { mdBook } from '@ibitsuki0296/md-book/astro';
+export default defineConfig({ integrations: [mdBook({ contentDir: 'content' })] });
+```
+
+```js
+// next.config.mjs — writes into public/ (add the generated files to .gitignore)
+import { withMdBook } from '@ibitsuki0296/md-book/next';
+export default withMdBook({ contentDir: 'content' })({ /* your Next config */ });
+```
+
+Options (all adapters): `contentDir` (default `content`), `title`, `description`,
+`locales` / `defaultLocale`, `search` (default `true`), `drafts` (dev always
+includes them), `base` (defaults to Vite `base` / Astro `base` / Next `basePath`).
+Adapter types are structural, so `vite`, `astro` and `next` are not dependencies.
+All three were exercised against real projects (Vite 6.4, Astro 7.3, Next.js 16.3:
+dev server, build, base / `basePath`, and — for Next — live regeneration in
+`next dev`); the repo's own tests cover them with fakes, since those frameworks are
+not dependencies. Vite's plugin type-checks against Vite's `Plugin`.
 
 ## Development
 
@@ -208,7 +361,7 @@ Add a locale by extending `src/core/i18n.ts`. Translating page **content**
 npm install
 npm test              # vitest
 npm run typecheck     # tsc --noEmit
-npm run build         # tsup -> dist/ (ESM + CJS + d.ts + CLI + CSS) + SRI hash
+npm run build         # tsup -> dist/ (ESM + CJS + d.ts + CLI + adapters + CSS) + SRI hash
 npm run lint          # biome
 npm run size          # size-limit (CDN bundle budget)
 npm run validate:tokens
@@ -240,7 +393,11 @@ for the full requirements doc. Milestones:
 | **M5 blog** *(done)* | `collectPosts` + date sort, `paginate`, tag/category grouping, list / pagination / taxonomy routes in the runtime, `generateFeed` (RSS/Atom/JSON) + `md-book feed` |
 | **M6 hardening** *(done)* | SEO head (canonical / OG / Twitter / Article JSON-LD), a11y structure + tests, `size-limit`, SRI hash, GitHub Actions CI, lefthook, Changesets, docs content, `0.1.0` |
 | **UI i18n** *(done, unreleased)* | `en` / `ja` string tables (`src/core/i18n.ts`), `mount({ locale })` + `<md-book lang>`, `<html lang>` / `og:locale` sync, `Intl`-formatted blog dates |
-| next | Static-build (SSG) mode; Astro / Vite / Next adapters; client-side search; Mermaid / KaTeX; content-level i18n (locale routing) |
+| **Search** *(done, unreleased)* | `md-book search-index`, CJK-friendly client search, header search box (`/` and `⌘K`), per-locale results |
+| **Math & diagrams** *(done, unreleased)* | `$…$` / `$$…$$` KaTeX and ```` ```mermaid ```` diagrams, lazy-loaded, theme-aware, build-time KaTeX |
+| **Content i18n** *(done, unreleased)* | Locale routing, `--locales`, language switcher, per-locale nav / blog / search, hreflang |
+| **SSG** *(done, unreleased)* | `md-book build`: pre-rendered pages + sitemap + feeds, runtime takes over on load |
+| **Adapters** *(done, unreleased)* | `@ibitsuki0296/md-book/{vite,astro,next,node}` |
 
 ## License
 

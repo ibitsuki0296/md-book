@@ -11,6 +11,9 @@ const SLOT_ATTR_MAP: Record<string, 'navbarEnd' | 'sidebarTop' | 'pageFooter'> =
  * `<md-book manifest="/manifest.json" base="/" router="history" lang="ja">`.
  *
  * `lang` sets the UI locale for generated chrome (`en` default, `ja` supported).
+ * `search` (optionally `search="/path/search-index.json"`), `math` and `mermaid`
+ * switch on the search box, KaTeX math and Mermaid diagrams. Content locales
+ * come from the manifest's `locales`.
  *
  * Renders into light DOM so the site stylesheet and themes apply. Children with
  * a `slot="navbar-end" | "sidebar-top" | "page-footer"` attribute are lifted
@@ -29,6 +32,9 @@ export class MdBookElement extends HTMLElement {
       'blog-dir',
       'blog-per-page',
       'site-url',
+      'search',
+      'math',
+      'mermaid',
     ];
   }
 
@@ -75,6 +81,11 @@ export class MdBookElement extends HTMLElement {
     if (themeMode === 'light' || themeMode === 'dark' || themeMode === 'system') {
       options.theme = { default: themeMode };
     }
+
+    const search = this.getAttribute('search');
+    if (search !== null) options.search = search ? { url: search } : true;
+    if (this.hasAttribute('math')) options.math = true;
+    if (this.hasAttribute('mermaid')) options.mermaid = true;
 
     const siteUrl = this.getAttribute('site-url');
     if (siteUrl) options.seo = { siteUrl };

@@ -6,6 +6,14 @@
  */
 
 export {
+  BLOG_DEFAULTS,
+  type BlogRuntimeConfig,
+  type BlogView,
+  type HrefSource,
+  localizeBlogConfig,
+  resolveBlogView,
+} from './core/blog-views.js';
+export {
   collectPosts,
   findTaxonomy,
   groupByCategory,
@@ -26,6 +34,7 @@ export {
   MANIFEST_VERSION,
   orderFromFilename,
   resolveRoutes,
+  stripManifestBase,
 } from './core/content.js';
 export { type HrefResolver, renderHome } from './core/home.js';
 export { type FeedFormat, type FeedOptions, generateFeed } from './core/feed.js';
@@ -38,10 +47,49 @@ export {
   SUPPORTED_LOCALES,
   type UIStrings,
 } from './core/i18n.js';
+export {
+  type LocaleAlternate,
+  type LocaleConfig,
+  type LocaleSetup,
+  alternatesOf,
+  entriesForLocale,
+  localeOfRoute,
+  localePrefix,
+  localeSite,
+  localizeRoute,
+  normalizeLocales,
+  stripLocale,
+} from './core/locale.js';
+export {
+  type ExtractOptions,
+  type SearchDoc,
+  type SearchIndex,
+  type SearchOptions,
+  type SearchResult,
+  type Searcher,
+  SEARCH_INDEX_VERSION,
+  assertSearchIndex,
+  createSearchIndex,
+  createSearcher,
+  extractSearchDoc,
+  htmlToText,
+} from './core/search.js';
+export {
+  type HeadAlternate,
+  type HeadContext,
+  type HeadData,
+  type HeadInput,
+  type HeadTag,
+  type SeoConfig,
+  buildHead,
+  headToHTML,
+} from './core/head.js';
+export type { MathRenderer } from './core/markdown/plugins/math.js';
 export type {
   Manifest,
   ManifestEntry,
   NavItem,
+  NavOptions,
   PrevNext,
   RouteNode,
   SidebarOptions,
@@ -61,4 +109,5 @@ export type {
   RenderResult,
   TocEntry,
 } from './core/types.js';
+export { DEFAULT_THEME_STORAGE_KEY, themeInitScript } from './core/theme-script.js';
 export { version } from './version.js';

@@ -8,6 +8,8 @@ import type { Router } from './router.js';
 export interface AppSite {
   title: string;
   description?: string;
+  /** Route the brand links to. Default `/`; a locale's home when the site is localised. */
+  home?: string;
 }
 
 export type SlotContent = string | Node;
@@ -38,6 +40,12 @@ export interface App {
   readonly article: HTMLElement;
   /** The header's trailing region — mount appends the theme toggle here. */
   readonly navbarEnd: HTMLElement;
+  /** Hidden container between the nav and `navbarEnd` that holds the search box. */
+  readonly navbarSearch: HTMLElement;
+  /** Swaps the UI language: re-labels the shell and applies to later renders. */
+  setStrings(next: UIStrings): void;
+  /** Updates the brand text / link (per-locale site title and home). */
+  setSite(site: AppSite): void;
   renderNav(nav: NavItem[]): void;
   renderPage(state: PageState): void;
   renderMessage(title: string, body: string): void;
@@ -50,9 +58,14 @@ const SIDEBAR_ID = 'md-book-sidebar';
 
 /** Builds the app shell once; subsequent calls update regions in place. */
 export function createApp(target: HTMLElement, options: AppOptions): App {
-  const { router, strings } = options;
+  const { router } = options;
+  let strings = options.strings;
 
-  const brand = h('a', { class: 'md-book-brand', href: router.href('/') }, options.site.title);
+  const brand = h(
+    'a',
+    { class: 'md-book-brand', href: router.href(options.site.home ?? '/') },
+    options.site.title,
+  );
   const nav = h('nav', { class: 'md-book-nav', aria: { label: strings.mainNavLabel } });
   const navbarEnd = h('div', { class: 'md-book-navbar-end' });
   applySlot(navbarEnd, options.slots?.navbarEnd);
@@ -63,7 +76,16 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     type: 'button',
     aria: { label: strings.menuLabel, expanded: 'false', controls: SIDEBAR_ID },
   });
-  const header = h('header', { class: 'md-book-header' }, menuButton, brand, nav, navbarEnd);
+  const navbarSearch = h('div', { class: 'md-book-navbar-search', hidden: true });
+  const header = h(
+    'header',
+    { class: 'md-book-header' },
+    menuButton,
+    brand,
+    nav,
+    navbarSearch,
+    navbarEnd,
+  );
 
   const sidebarTop = h('div', { class: 'md-book-sidebar__top' });
   applySlot(sidebarTop, options.slots?.sidebarTop);
@@ -90,14 +112,8 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
 
   const body = h('div', { class: 'md-book-body' }, sidebar, content, tocNav);
   const backdrop = h('div', { class: 'md-book-backdrop', aria: { hidden: 'true' } });
-  const root = h(
-    'div',
-    { class: 'md-book' },
-    h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, strings.skipToContent),
-    header,
-    backdrop,
-    body,
-  );
+  const skip = h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, strings.skipToContent);
+  const root = h('div', { class: 'md-book' }, skip, header, backdrop, body);
 
   target.replaceChildren(root);
 
@@ -117,6 +133,21 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   sidebar.addEventListener('click', (event) => {
     if ((event.target as Element).closest('a')) setMenu(false, false);
   });
+
+  const setStrings = (next: UIStrings) => {
+    strings = next;
+    skip.textContent = next.skipToContent;
+    nav.setAttribute('aria-label', next.mainNavLabel);
+    menuButton.setAttribute('aria-label', next.menuLabel);
+    sidebarNav.setAttribute('aria-label', next.sidebarLabel);
+    pager.setAttribute('aria-label', next.pageNavLabel);
+    tocNav.setAttribute('aria-label', next.onThisPageLabel);
+  };
+
+  const setSite = (site: AppSite) => {
+    brand.textContent = site.title;
+    brand.setAttribute('href', router.href(site.home ?? '/'));
+  };
 
   const renderNav = (items: NavItem[]) => {
     replaceChildren(
@@ -169,6 +200,9 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     content,
     article,
     navbarEnd,
+    navbarSearch,
+    setStrings,
+    setSite,
     renderNav,
     renderPage,
     renderMessage,

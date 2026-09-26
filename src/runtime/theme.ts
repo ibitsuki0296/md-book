@@ -1,7 +1,8 @@
+import { DEFAULT_THEME_STORAGE_KEY, themeInitScript } from '../core/theme-script.js';
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 
-export const DEFAULT_THEME_STORAGE_KEY = 'md-book-theme';
+export { DEFAULT_THEME_STORAGE_KEY, themeInitScript };
 
 export interface ThemeControllerOptions {
   /** localStorage key for the persisted mode. */
@@ -94,16 +95,6 @@ export function createThemeController(options: ThemeControllerOptions = {}): The
       listeners.clear();
     },
   };
-}
-
-/**
- * A tiny script to inline in `<head>` so the theme is set before first paint
- * (no flash of the wrong theme). Pass the same `storageKey` you give the
- * controller.
- */
-export function themeInitScript(storageKey = DEFAULT_THEME_STORAGE_KEY): string {
-  const key = JSON.stringify(storageKey);
-  return `(function(){try{var m=localStorage.getItem(${key});if(m==="light"||m==="dark"){document.documentElement.setAttribute("data-theme",m);}}catch(e){}})();`;
 }
 
 function readStored(key: string): ThemeMode | null {

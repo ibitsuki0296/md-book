@@ -2,6 +2,7 @@ import { type Dirent, readFileSync, readdirSync, statSync, writeFileSync } from 
 import { join, relative, sep } from 'node:path';
 import { MANIFEST_VERSION, type Manifest, type ManifestEntry, makeEntry } from '../core/content.js';
 import { parseFrontMatter } from '../core/frontmatter.js';
+import { type LocaleConfig, localeOfRoute, normalizeLocales } from '../core/locale.js';
 import type { FrontMatter } from '../core/types.js';
 
 export interface GenerateManifestOptions {
@@ -18,6 +19,14 @@ export interface GenerateManifestOptions {
   includeDrafts?: boolean;
   /** Directory / file names to skip entirely. */
   ignore?: string[];
+  /**
+   * Content-level i18n. The default locale lives at the content root, every
+   * other locale in a directory named after its code (`ja/guide/intro.md` →
+   * `/ja/guide/intro`). Codes or `{ code, label, title, description }` objects.
+   */
+  locales?: ReadonlyArray<string | LocaleConfig>;
+  /** Default locale code. Defaults to the first locale. */
+  defaultLocale?: string;
 }
 
 const MD_FILE = /\.(?:md|markdown)$/i;
@@ -29,6 +38,7 @@ export function generateManifest(options: GenerateManifestOptions): Manifest {
   const ignore = new Set([...DEFAULT_IGNORE, ...(options.ignore ?? [])]);
   const files = walk(options.contentDir, options.contentDir, ignore).sort();
 
+  const setup = normalizeLocales(options.locales, options.defaultLocale);
   const entries: ManifestEntry[] = [];
   for (const file of files) {
     const abs = join(options.contentDir, file);
@@ -36,7 +46,9 @@ export function generateManifest(options: GenerateManifestOptions): Manifest {
     const frontMatter = parseFrontMatter(raw).data as FrontMatter;
     if (frontMatter.draft === true && !options.includeDrafts) continue;
     const mtime = safeMtime(abs);
-    entries.push(makeEntry(toPosix(file), frontMatter, base, mtime));
+    const entry = makeEntry(toPosix(file), frontMatter, base, mtime);
+    if (setup) entry.locale = localeOfRoute(stripBase(entry.path, base), setup);
+    entries.push(entry);
   }
 
   entries.sort((a, b) => a.path.localeCompare(b.path) || a.file.localeCompare(b.file));
@@ -47,6 +59,10 @@ export function generateManifest(options: GenerateManifestOptions): Manifest {
     entries,
     generatedAt: new Date().toISOString(),
   };
+  if (setup) {
+    manifest.locales = setup.locales;
+    manifest.defaultLocale = setup.defaultLocale;
+  }
   if (options.contentBase) manifest.contentBase = options.contentBase;
   if (options.title) manifest.title = options.title;
   if (options.description) manifest.description = options.description;
@@ -61,6 +77,13 @@ export function writeManifest(options: GenerateManifestOptions & { out: string }
   const manifest = generateManifest(options);
   writeFileSync(options.out, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
   return { manifest, written: options.out };
+}
+
+function stripBase(path: string, base: string): string {
+  const prefix = base === '/' || base === '' ? '' : `/${base.replace(/^\/+|\/+$/g, '')}`;
+  if (!prefix) return path;
+  if (path === prefix) return '/';
+  return path.startsWith(`${prefix}/`) ? path.slice(prefix.length) : path;
 }
 
 function walk(root: string, dir: string, ignore: Set<string>): string[] {

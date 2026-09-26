@@ -6,9 +6,9 @@ import {
   groupByCategory,
   groupByTag,
   paginate,
-} from '../core/blog.js';
-import type { ManifestEntry } from '../core/content.js';
-import type { UIStrings } from '../core/i18n.js';
+} from './blog.js';
+import type { ManifestEntry } from './content.js';
+import type { UIStrings } from './i18n.js';
 
 export interface BlogRuntimeConfig {
   dir: string;
@@ -23,6 +23,20 @@ export const BLOG_DEFAULTS: BlogRuntimeConfig = {
   tagsBase: '/tags',
   categoriesBase: '/categories',
 };
+
+/**
+ * Blog routes for one locale: the default locale keeps the config as-is, other
+ * locales get a `/<code>` prefix (`ja/blog`, `/ja/tags`, `/ja/categories`).
+ */
+export function localizeBlogConfig(config: BlogRuntimeConfig, prefix: string): BlogRuntimeConfig {
+  if (!prefix) return config;
+  return {
+    ...config,
+    dir: `${prefix.replace(/^\//, '')}/${config.dir}`,
+    tagsBase: `${prefix}${config.tagsBase}`,
+    categoriesBase: `${prefix}${config.categoriesBase}`,
+  };
+}
 
 /** Locale-aware bits threaded through the blog views. */
 export interface BlogI18n {
@@ -40,7 +54,8 @@ export interface BlogView {
   hasOwnPage: boolean;
 }
 
-interface HrefResolver {
+/** Anything that can turn a route path into an `href` (the runtime router, or an SSG resolver). */
+export interface HrefSource {
   href(to: string): string;
 }
 
@@ -52,7 +67,7 @@ export function resolveBlogView(
   route: string,
   entries: ManifestEntry[],
   config: BlogRuntimeConfig,
-  router: HrefResolver,
+  router: HrefSource,
   hasOwnPage: boolean,
   i18n: BlogI18n,
 ): BlogView | null {
@@ -107,7 +122,7 @@ function listView(
   pageNumber: number,
   config: BlogRuntimeConfig,
   blogRoot: string,
-  router: HrefResolver,
+  router: HrefSource,
   hasOwnPage: boolean,
   i18n: BlogI18n,
 ): BlogView {
@@ -130,7 +145,7 @@ function taxonomyView(
   slug: string,
   base: string,
   config: BlogRuntimeConfig,
-  router: HrefResolver,
+  router: HrefSource,
   i18n: BlogI18n,
 ): BlogView {
   const { strings } = i18n;
@@ -157,7 +172,7 @@ function taxonomyIndexView(
   title: string,
   groups: ReturnType<typeof groupByTag>,
   base: string,
-  router: HrefResolver,
+  router: HrefSource,
   strings: UIStrings,
 ): BlogView {
   const items = groups
@@ -177,7 +192,7 @@ function taxonomyIndexView(
 function postCard(
   post: BlogPost,
   config: BlogRuntimeConfig,
-  router: HrefResolver,
+  router: HrefSource,
   i18n: BlogI18n,
 ): string {
   const tags = post.tags
@@ -208,7 +223,7 @@ function paginationNav(
   page: number,
   pageCount: number,
   blogRoot: string,
-  router: HrefResolver,
+  router: HrefSource,
   i18n: BlogI18n,
 ): string {
   if (pageCount <= 1) return '';
