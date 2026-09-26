@@ -165,7 +165,13 @@ export async function buildSite(options: BuildSiteOptions): Promise<BuildSiteRes
 
   const dist = resolveDistDir(options.distDir);
   copyAsset(dist, 'style.css', write);
-  if (runtime) copyAsset(dist, 'md-book.global.js', write);
+  if (runtime) {
+    copyAsset(dist, 'md-book.global.js', write);
+    // The bundle embeds third-party code whose licences require the notice to travel with it.
+    if (existsSync(join(dist, 'THIRD_PARTY_LICENSES.txt'))) {
+      copyAsset(dist, 'THIRD_PARTY_LICENSES.txt', write);
+    }
+  }
   const themesDir = join(dist, 'themes');
   if (existsSync(themesDir)) {
     for (const name of readdirSync(themesDir)) {
