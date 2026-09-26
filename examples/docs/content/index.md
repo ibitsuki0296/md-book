@@ -30,6 +30,10 @@ features:
     title: Blog included
     details: Date-sorted posts, tags, categories, pagination and RSS / Atom / JSON feeds.
     link: /blog
+  - icon: "縦"
+    title: Vertical writing
+    details: Set tanka and other Japanese text in 縦書き, with ruby and a `:::tanka` block.
+    link: /tanka
   - icon: "♿"
     title: Accessible
     details: Skip link, landmarks, focus rings, reduced-motion support and a keyboard-friendly drawer.

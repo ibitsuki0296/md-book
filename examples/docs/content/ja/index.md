@@ -11,6 +11,9 @@ hero:
     - text: はじめる
       link: /ja/guide/getting-started
       theme: brand
+    - text: テーマ
+      link: /ja/guide/theming
+      theme: alt
     - text: 検索・数式・図
       link: /ja/guide/search-math-diagrams
       theme: alt
@@ -21,6 +24,11 @@ features:
   - icon: "◐"
     title: トークンでテーマ変更
     details: '`--md-book-*` カスタムプロパティだけでライト／ダークを含む全体の見た目を変えられます。'
+    link: /ja/guide/theming
+  - icon: "縦"
+    title: 縦書き
+    details: 短歌などの日本語を、ルビや `:::tanka` ブロックと一緒に縦書きで組めます。
+    link: /ja/tanka
   - icon: "🔍"
     title: 全文検索
     details: ビルド時に作る JSON を読み込む、日本語にも対応したクライアント検索。
