@@ -1,304 +1,252 @@
 # @ibitsuki0296/md-book
 
-Runtime-first Markdown **documentation & blog** library with token-based theming.
+**Turn a folder of Markdown files into a documentation site or blog.** Use it with no
+build step at all, pre-render it to static HTML, or plug it into Vite, Astro or Next.js.
 
-Write content in Markdown, drop in a `manifest.json`, and render a full docs/blog
-site in the browser — no build step required. Or run `md-book build` for a
-pre-rendered static site (SSG), or plug the content pipeline into Vite, Astro or
-Next.js. The core is deliberately pure, so the runtime, the SSG and the adapters
-all share it.
+**[Live demo → ibitsuki0296.github.io/md-book](https://ibitsuki0296.github.io/md-book/)**
+(the demo site is built from [`examples/docs/`](examples/docs) with `md-book build`).
 
-> **Status: 0.1.0 published; unreleased on `main`:** UI i18n, the design refresh,
-> vertical writing, and — new — a static-build (SSG) mode, Vite / Astro / Next
-> adapters, client-side full-text search, KaTeX math, Mermaid diagrams and
-> content-level i18n (locale routing). All implemented and tested.
+```
+content/
+├─ index.md
+├─ guide/
+│  ├─ 01-getting-started.md
+│  └─ 02-configuration.md
+└─ blog/
+   └─ 2026-02-01-hello-world.md
+```
 
-## Why "md-book"
+## Features
 
-The bare npm name `md-book` was taken, so the package publishes as
-`@ibitsuki0296/md-book`. The project, repo, and CLI keep the name `md-book`.
+- **Docs and blog in one** — sidebar, table of contents, prev/next pager, dated posts with
+  pagination, tags, categories and RSS / Atom / JSON feeds.
+- **Three ways to run it** — render in the browser, pre-render to static HTML (SSG), or use
+  the Vite / Astro / Next.js adapters.
+- **Themeable** — every colour, font and size is a `--md-book-*` CSS variable. Light and dark
+  mode built in, no flash on load.
+- **Full-text search** — runs in the browser from a JSON index, and works well for Japanese
+  and other languages that don't put spaces between words.
+- **Math and diagrams** — KaTeX (`$x^2$`) and Mermaid, loaded only on pages that use them.
+- **Multilingual** — translate the UI (English and Japanese included) and serve whole sites
+  in several languages, with a language switcher and `hreflang` tags.
+- **Vertical writing** — 縦書き layout and ruby (furigana) for Japanese text such as tanka.
+- **SEO-ready** — canonical URLs, Open Graph / Twitter tags, JSON-LD and a sitemap.
+- **Accessible and safe by default** — semantic landmarks, skip link, keyboard navigation;
+  raw HTML in Markdown is escaped unless you opt in.
+- **Small and dependency-light** — the whole browser bundle is about 94 kB gzipped.
 
-## Install
+## Quick start
+
+Install:
 
 ```bash
 npm install @ibitsuki0296/md-book
 ```
 
-## Core API (implemented now)
+Requires Node 24 or newer for the CLI and adapters. The browser runtime runs in any modern browser.
 
-`renderMarkdown()` turns a Markdown document into HTML plus the structured
-metadata the runtime and SSG layers need. It never touches the DOM or the
-filesystem.
+### Option A — Vite
 
 ```ts
-import { renderMarkdown } from '@ibitsuki0296/md-book';
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { mdBook } from '@ibitsuki0296/md-book/vite';
 
-const { html, frontMatter, toc, headings, excerpt } = renderMarkdown(source, {
-  tocDepth: [2, 3],
-  linkRewrite: { currentPath: '/guide/intro', base: '/' },
+export default defineConfig({
+  plugins: [mdBook({ contentDir: 'content', title: 'My Docs' })],
 });
 ```
 
-What the core handles:
-
-- CommonMark + GFM (tables, strikethrough, task lists, autolinks)
-- YAML front matter (`title`, `date`, `tags`, `draft`, `order`, …)
-- Slugged heading ids + clickable permalink anchors
-- Nested table of contents built from a configurable heading-level range
-- `:::note` / `:::warning` / `:::details` container blocks
-- Rewriting relative `*.md` links (and `index.md` / `README.md`) to route paths
-- Footnotes, external-link `rel` hardening
-- First-paragraph excerpt (front-matter `description` wins)
-
-Raw HTML in the source is escaped unless you pass `allowHtml: true`.
-
-## Content model & CLI (implemented now)
-
-`generateManifest()` (and the `md-book manifest` CLI) walk a content directory
-into a `manifest.json`: one entry per page with its resolved route path, front
-matter, and sort key. `YYYY-MM-DD-` blog prefixes and `NN-` ordering prefixes
-are stripped from routes; drafts are excluded by default.
-
-```bash
-npx md-book manifest ./content --base /          # writes content/manifest.json
-npx md-book dev --root . --content ./content     # static server + live reload + /manifest.json
+```html
+<!-- index.html -->
+<div id="app"></div>
+<script type="module" src="/src/main.ts"></script>
 ```
 
-Add `--locales en,ja` for a multi-language site
-([Content i18n](#content-i18n-locale-routing)), and `md-book search-index` for the
-search box ([Search](#search)). Pure helpers for laying out a site: `resolveRoutes` (flat entries → route tree),
-`buildNav`, `buildSidebar` (section-scoped, draft-aware), `flattenPages` +
-`getPrevNext`, and `assertManifest` for validating a fetched manifest.
+```ts
+// src/main.ts
+import '@ibitsuki0296/md-book/style.css';
+import { mount } from '@ibitsuki0296/md-book/runtime';
 
-## Browser runtime (implemented now)
+mount('#app', { manifestUrl: '/manifest.json', search: true });
+```
 
-The runtime renders a full site in the browser from a manifest — no build step.
+Put Markdown files in `content/` and run `vite`. The plugin serves `manifest.json`,
+`search-index.json` and your Markdown from the dev server (reloading when you edit), and emits
+them on `vite build`.
+
+Astro and Next.js work the same way — see [Framework adapters](#framework-adapters).
+
+### Option B — a plain HTML page
+
+Copy `style.css` and `md-book.global.js` from `node_modules/@ibitsuki0296/md-book/dist/` next to
+your page, then:
 
 ```html
-<md-book manifest="/manifest.json" base="/" router="history"></md-book>
-<script src="https://cdn.example/@ibitsuki0296/md-book/md-book.global.js"></script>
+<!-- index.html -->
+<link rel="stylesheet" href="/style.css" />
+<md-book manifest="/manifest.json" search blog></md-book>
+<script src="/md-book.global.js"></script>
 ```
 
-or programmatically:
+```bash
+npx md-book dev --root . --content ./content
+```
+
+`md-book dev` serves the page with live reload and generates `/manifest.json` from `./content`
+on the fly. For production, generate the files once with `npx md-book manifest ./content` and
+upload them with your page.
+
+### Option C — pre-rendered static site
+
+No HTML to write at all:
+
+```bash
+npx md-book build ./content --out dist-site --title "My Docs" \
+  --site-url https://example.com/ --blog --search
+```
+
+Upload `dist-site/` to any static host. See [Static build](#static-build-ssg).
+
+## Writing content
+
+### Files and routes
+
+| File | Route |
+|---|---|
+| `content/index.md` | `/` |
+| `content/guide/01-getting-started.md` | `/guide/getting-started` |
+| `content/blog/2026-02-01-hello-world.md` | `/blog/hello-world` |
+
+- A leading `NN-` sets the order in the sidebar and is removed from the URL.
+- A leading `YYYY-MM-DD-` marks a blog post and is removed from the URL.
+- Files named `index.md` (or `README.md`) become the page for their folder.
+- Relative links between pages (`[setup](./02-configuration.md)`) are rewritten to routes.
+
+### Front matter
+
+```yaml
+---
+title: Page title
+description: Used for the excerpt and the meta description
+date: 2026-02-01        # makes the page a blog post
+updated: 2026-02-10
+tags: [guide, intro]
+categories: [Handbook]
+draft: true             # hidden from production output
+order: 2                # sidebar position among siblings
+slug: custom-slug       # overrides the slug derived from the file name
+layout: home            # landing page with hero and feature cards
+writing: vertical       # vertical writing (縦書き)
+---
+```
+
+### Markdown
+
+Standard CommonMark plus GitHub-flavoured extras: tables, task lists, strikethrough,
+autolinks and footnotes. Headings get anchor links, and code blocks get syntax
+highlighting (JavaScript / TypeScript, JSON, CSS, HTML, shell, YAML, Python, diff) and a copy
+button.
+
+Callouts use fenced containers:
+
+```md
+:::note
+Context the reader can skim past.
+:::
+
+:::warning Heads up
+Something that can bite later.
+:::
+
+:::details Click to expand
+Hidden until opened.
+:::
+```
+
+Available types: `note`, `tip`, `info`, `warning`, `danger`, `details`.
+
+### Landing page
+
+`layout: home` gives a full-width page with a hero and feature cards:
+
+```yaml
+---
+title: My project
+layout: home
+hero:
+  name: v1.0
+  text: A headline that sells it
+  tagline: One supporting sentence.
+  actions:
+    - text: Get started
+      link: /guide/getting-started
+    - text: GitHub
+      link: https://github.com/you/project
+      theme: alt
+features:
+  - title: Just Markdown
+    details: Short description.
+---
+```
+
+## Ways to run md-book
+
+| | Browser runtime | Static build (SSG) | Framework adapters |
+|---|---|---|---|
+| You provide | A page with `<md-book>` and a manifest | A folder of Markdown | A Vite / Astro / Next.js project |
+| Output | Pages rendered in the browser | Real HTML for every route | Manifest, search index and Markdown served / emitted for your app |
+| Good for | Quick setups, no build step | Public sites: SEO, link previews, no-JS readers | Adding docs to an existing app |
+
+All three share the same rendering code, so a page looks the same in each.
+
+### Browser runtime
+
+`<md-book>` (or `mount()`) fetches the manifest, then renders each page on demand. It provides
+the header, sidebar, table of contents, pager and footer, client-side navigation with hover
+prefetching, code copy buttons, TOC scroll-spy, a light/dark toggle and SEO tags.
+
+`<md-book>` attributes:
+
+| Attribute | Meaning |
+|---|---|
+| `manifest` | URL of `manifest.json` |
+| `base` | Site base path, e.g. `/docs/` |
+| `router` | `history` (default) or `hash` |
+| `heading` | Site title for the header and `<title>` |
+| `lang` | UI language: `en` or `ja` |
+| `theme` | Initial mode: `light`, `dark` or `system` |
+| `blog`, `blog-dir`, `blog-per-page` | Enable and configure the blog |
+| `search` | Add the search box |
+| `math`, `mermaid` | Turn on math and diagrams |
+| `site-url` | Absolute site URL for canonical / Open Graph links |
+
+Children with `slot="navbar-end"`, `slot="sidebar-top"` or `slot="page-footer"` are placed in
+those parts of the page.
+
+The same options are available programmatically:
 
 ```ts
 import { mount } from '@ibitsuki0296/md-book/runtime';
 
-const site = await mount('#app', { manifestUrl: '/manifest.json' });
+const site = await mount('#app', {
+  manifestUrl: '/manifest.json',
+  locale: 'ja',
+  search: true,
+  math: true,
+  blog: { perPage: 10 },
+  theme: { default: 'system', toggle: true },
+  seo: { siteUrl: 'https://example.com/' },
+});
+
 site.navigate('/guide/getting-started');
 ```
 
-It builds the shell (skip link, header nav, sidebar, content, TOC rail, prev/next
-pager, footer), runs a History-API (or `hash`) client router that intercepts
-internal links and prefetches on hover, fetches + renders each page through the
-core, adds copy buttons to code blocks, tracks the active heading for the TOC,
-and keeps `<title>` / `meta[description]` in sync. Fenced code gets built-in
-syntax highlighting (js/ts, json, css, html, sh, yaml, python, diff); pass
-`highlight: (code, lang) => html` to plug in a fuller highlighter, and
-`locale: 'ja'` to localise the generated UI (see [Internationalisation](#internationalisation-implemented-now)).
+### Static build (SSG)
 
-Run the example site (`examples/docs/`):
-
-```bash
-npm run example   # build + serve at http://localhost:4173
-```
-
-## Theming (implemented now)
-
-The public theming API is a set of namespaced CSS custom properties
-(`--md-book-*`) in `dist/style.css`. Everything the runtime renders is styled
-through them, so **a theme is just a stylesheet that redefines tokens** — load it
-after `style.css`:
-
-```html
-<link rel="stylesheet" href="@ibitsuki0296/md-book/style.css" />
-<link rel="stylesheet" href="@ibitsuki0296/md-book/themes/ink.css" />   <!-- or your own -->
-```
-
-The bundled rules live in `@layer md-book.tokens, .base, .layout, .content,
-.components`, so any unlayered rule you add wins without specificity fights.
-`themes/default.css` is a copy-paste template listing every token.
-
-Light/dark: tokens are redefined for `@media (prefers-color-scheme: dark)` (unless
-`data-theme="light"`) and for `data-theme="dark"`. The runtime `createThemeController()`
-sets `data-theme` on `<html>`, persists the choice, emits `md-book:themechange`,
-and `mount()` adds a header toggle (disable with `theme: { toggle: false }`).
-Paste `themeInitScript()` into `<head>` to avoid a flash of the wrong theme.
-
-`npm run validate:tokens` fails the build if a raw colour literal sneaks into a
-component stylesheet instead of a token.
-
-### Theme playground
-
-An interactive editor for the token contract lives in `examples/playground/`:
-
-```bash
-npm run playground   # build + serve at http://localhost:4180
-```
-
-Tweak colours, typography, and layout/shape — with **light and dark edited
-independently** — while a real `<md-book>` site (the `examples/docs` content)
-re-styles live in a preview frame. Seed from a built-in theme (`default`, `ink`),
-then **Copy** or **Download** the result as a drop-in stylesheet (`:root` +
-`:root[data-theme="dark"]` + an optional `@media (prefers-color-scheme: dark)`
-block), matching the format of `themes/ink.css`.
-
-It is local tooling — vanilla ES modules, no build step, and not part of the
-published package. `examples/playground/tokens.js` mirrors `src/styles/tokens.css`
-and must be kept in sync when tokens change.
-
-## Blog (implemented now)
-
-Any dated Markdown file under `blog/` (configurable) is a post. Enable the blog
-routes with `blog: true` (or `<md-book blog blog-per-page="10">`):
-
-- `/blog` — post list, newest first, paginated (`/blog/page/2`, …). If
-  `blog/index.md` exists its body is rendered above the list.
-- `/tags` and `/tags/:slug`, `/categories` and `/categories/:slug` — taxonomy
-  index and per-term post lists.
-
-Drafts (`draft: true`) and future-dated posts are hidden. List cards show the
-front-matter `description` as the summary.
-
-Core helpers — `collectPosts`, `paginate`, `groupByTag` / `groupByCategory` — and
-`generateFeed(posts, options, 'rss' | 'atom' | 'json')` are exported for build
-tools. The CLI writes all three:
-
-```bash
-npx md-book feed ./content --site-url https://example.com/ --title "My blog"
-# -> content/feed.xml, content/atom.xml, content/feed.json
-```
-
-## Internationalisation (implemented now)
-
-The strings the runtime renders itself — pager, code-copy button, skip link,
-blog list / pagination / taxonomy labels, theme-toggle `aria-label`s, and the
-route error messages — are translatable. `en` (default) and `ja` ship built in.
-
-```html
-<md-book manifest="/manifest.json" base="/" lang="ja"></md-book>
-```
-
-```ts
-await mount('#app', {
-  manifestUrl: '/manifest.json',
-  locale: 'ja',                     // BCP-47 tags accepted; unknown -> 'en'
-  strings: { copy: 'クリップボードへ' }, // optional per-string overrides
-});
-```
-
-The resolved locale is written to `<html lang>` and emitted as `og:locale`, and
-blog post dates are formatted with `Intl.DateTimeFormat` for it (the
-`<time datetime>` attribute stays ISO).
-
-The tables and helpers are pure and exported for an SSG layer:
-
-```ts
-import {
-  resolveLocale,   // 'ja-JP' -> 'ja', unknown -> 'en'
-  getStrings,      // full UIStrings table for a locale
-  createStrings,   // resolve + shallow-merge overrides
-  SUPPORTED_LOCALES,
-  type UIStrings,
-} from '@ibitsuki0296/md-book';
-```
-
-Add a UI language by extending `src/core/i18n.ts`. To translate page **content**,
-see [Content i18n](#content-i18n-locale-routing) below.
-
-## Search
-
-A full-text search box in the header, built from a JSON index — no server and no
-extra dependency. Japanese (and any language without spaces) works because it
-matches normalised substrings rather than words; full-width / half-width forms
-are unified and every term must match (AND).
-
-```bash
-npx md-book search-index ./content            # -> content/search-index.json
-```
-
-```html
-<md-book manifest="/manifest.json" search></md-book>     <!-- or mount({ search: true }) -->
-```
-
-`search` looks for `search-index.json` next to the manifest (`search="/x.json"` /
-`search: { url, limit }` to override). The index is fetched the first time someone
-types; press `/` or `Ctrl`/`⌘`+`K` to focus the box. Results show the page, the
-matching section heading and a highlighted snippet, and follow the current locale
-on localised sites. `md-book dev` serves `/search-index.json` live.
-
-Core: `extractSearchDoc`, `createSearchIndex`, `createSearcher` (all pure);
-runtime: `createSearchBox`. Tune the index with `--max-chars` (body text kept per
-page, default 8000).
-
-## Math & diagrams
-
-Both are opt-in and load their library **lazily, only on pages that use them**
-— nothing is added to the bundle.
-
-```html
-<md-book manifest="/manifest.json" math mermaid></md-book>
-```
-
-- **Math** (KaTeX): `$inline$` and `$$display$$` (single- or multi-line). Pandoc-style
-  delimiting keeps prose like "costs $5 and $10" untouched. Escaped TeX is emitted
-  in `.md-book-math` elements until KaTeX typesets it.
-- **Diagrams** (Mermaid): fence a block with <code>```mermaid</code>. Rendered with
-  `securityLevel: 'strict'` and redrawn when the light/dark theme changes.
-
-By default the ES builds are imported from jsDelivr. To self-host or bundle, pass
-your own loader:
-
-```ts
-await mount('#app', {
-  math:    { load: () => import('katex'), katex: { macros: { '\\R': '\\mathbb{R}' } } },
-  mermaid: { load: () => import('mermaid'), config: { flowchart: { htmlLabels: false } } },
-});
-```
-
-(Under a strict CSP, self-host and allow the script/style origins you use.) In the
-core, `renderMarkdown(src, { math: true | { render }, mermaid: true })` — pass
-`render: (tex, display) => katex.renderToString(tex, { displayMode: display })`
-to typeset at render time, which is what `md-book build --math` does when `katex`
-is installed in your project.
-
-## Content i18n (locale routing)
-
-Serve a site in several languages. The **default locale lives at the content root**
-and every other locale in a directory named after its code:
-
-```
-content/guide/intro.md      →  /guide/intro       (en, default)
-content/ja/guide/intro.md   →  /ja/guide/intro    (ja)
-content/ja/index.md         →  /ja                (ja home)
-```
-
-```bash
-npx md-book manifest ./content --locales en,ja                 # or en:English,ja:日本語
-npx md-book dev --content ./content --locales en,ja
-```
-
-The manifest records `locales` / `defaultLocale` (and `entry.locale`), so the
-runtime needs no extra configuration. Then, per route:
-
-- the UI language, `<html lang>` and `og:locale` follow the page's locale;
-- nav, sidebar, prev/next, blog routes (`/ja/blog`, `/ja/tags`) and search are
-  scoped to that locale;
-- a language switcher appears in the header and jumps to the **same page** in the
-  other language, or to that locale's home when it has no translation;
-- translated pages get `<link rel="alternate" hreflang>` (plus `x-default`).
-
-Give each locale its own title with `{ code: 'ja', label: '日本語', title: '…' }`
-(`mount({ locales })` or the manifest). Directory sections show their folder name
-in the nav; add an `index.md` with a `title` to a section to name it. For feeds use
-`md-book feed … --dir ja/blog --out …` (or `md-book build`, which writes one per
-locale).
-
-## Static build (SSG)
-
-`md-book build` pre-renders every route to real HTML — app shell, content, TOC,
-pager, canonical / Open Graph / hreflang / JSON-LD — for crawlers, link previews
-and no-JS readers. The pages still carry the runtime, which takes over on load, so
+`md-book build` pre-renders every route into real HTML — including the shell, table of
+contents, canonical / Open Graph / `hreflang` / JSON-LD tags — for crawlers, link previews and
+readers without JavaScript. The pages still carry the runtime, which takes over after load, so
 client-side navigation, search and the theme toggle keep working.
 
 ```bash
@@ -306,33 +254,22 @@ npx md-book build ./content --out dist-site \
   --site-url https://example.com/ --locales en,ja --blog --search --math --mermaid
 ```
 
-The output contains `index.html` for each route (plus blog pages, tags,
-categories and a `404.html` that doubles as an SPA fallback), `manifest.json`,
-`search-index.json`, `sitemap.xml`, blog feeds, the raw Markdown, and
-`md-book.global.js` / `style.css` / `themes/`. Serve it from any static host; for a
-project-page deployment add `--base /repo/` and make `--site-url` include it.
-`--head <file>` injects extra `<head>` HTML (fonts, analytics), `--theme` sets the
-default theme, `--no-runtime` emits plain HTML + CSS only. It refuses to write
-inside the content directory. Draft and future-dated content follows the same
-rules as the runtime (future-dated posts are evaluated at build time).
+The output has an `index.html` per route (plus blog list, tag and category pages and a
+`404.html`), `manifest.json`, `search-index.json`, `sitemap.xml`, feeds, the raw Markdown and
+the runtime assets. For a project page such as GitHub Pages, add `--base /repo/` and include
+the base in `--site-url`. See [`.github/workflows/pages.yml`](.github/workflows/pages.yml) for a
+complete GitHub Pages deployment.
 
-Programmatic: `import { buildSite, renderSite } from '@ibitsuki0296/md-book/node'`.
-`renderSite` is pure (sources in, `{ file, html }[]` out); the shell it emits is
-kept in lock-step with the runtime's DOM by a parity test.
+Useful options: `--head <file>` injects extra `<head>` HTML (fonts, analytics), `--theme` sets
+the default theme, and `--no-runtime` emits plain HTML and CSS only.
 
-## Framework adapters
+From code: `import { buildSite, renderSite } from '@ibitsuki0296/md-book/node'`.
 
-Feed the content pipeline into an existing app. Each adapter generates
-`manifest.json`, `search-index.json` and the raw Markdown (base-aware, live in
-dev, emitted on build) — you mount `<md-book>` / `mount()` in your own page and
-import `@ibitsuki0296/md-book/style.css`.
+### Framework adapters
 
-```ts
-// vite.config.ts
-import { mdBook } from '@ibitsuki0296/md-book/vite';
-export default defineConfig({ plugins: [mdBook({ contentDir: 'content' })] });
-// also: import manifest from 'virtual:md-book/manifest'
-```
+Each adapter generates `manifest.json`, `search-index.json` and the raw Markdown — live during
+development and emitted on build. You mount `<md-book>` or `mount()` in your own page and import
+`@ibitsuki0296/md-book/style.css`.
 
 ```js
 // astro.config.mjs
@@ -346,59 +283,206 @@ import { withMdBook } from '@ibitsuki0296/md-book/next';
 export default withMdBook({ contentDir: 'content' })({ /* your Next config */ });
 ```
 
-Options (all adapters): `contentDir` (default `content`), `title`, `description`,
-`locales` / `defaultLocale`, `search` (default `true`), `drafts` (dev always
-includes them), `base` (defaults to Vite `base` / Astro `base` / Next `basePath`).
-Adapter types are structural, so `vite`, `astro` and `next` are not dependencies.
-All three were exercised against real projects (Vite 6.4, Astro 7.3, Next.js 16.3:
-dev server, build, base / `basePath`, and — for Next — live regeneration in
-`next dev`); the repo's own tests cover them with fakes, since those frameworks are
-not dependencies. Vite's plugin type-checks against Vite's `Plugin`.
+The Vite plugin also exposes the manifest as `import manifest from 'virtual:md-book/manifest'`.
+
+Options: `contentDir` (default `content`), `title`, `description`, `locales`, `defaultLocale`,
+`search` (default `true`), `drafts` and `base` (taken from the framework's own base path
+unless you set it). `vite`, `astro` and `next` are not dependencies of md-book.
+
+## Blog
+
+Any dated Markdown file under `blog/` is a post. Turn the blog on with `blog` (attribute) or
+`blog: true` (option); the static build takes `--blog`.
+
+- `/blog` — posts newest first, paginated (`/blog/page/2`, …). If `blog/index.md` exists, its
+  text is shown above the list.
+- `/tags`, `/tags/:slug`, `/categories`, `/categories/:slug` — taxonomy pages.
+
+Drafts and future-dated posts are hidden. Generate feeds with:
+
+```bash
+npx md-book feed ./content --site-url https://example.com/ --title "My blog"
+# → feed.xml, atom.xml, feed.json
+```
+
+`md-book build --site-url …` writes the feeds for you (one set per language on multilingual
+sites).
+
+## Search
+
+A search box in the header, built from a JSON index. There is no server and no extra dependency.
+
+```bash
+npx md-book search-index ./content    # → content/search-index.json
+```
+
+```html
+<md-book manifest="/manifest.json" search></md-book>
+```
+
+Matching works on normalised substrings rather than words, so Japanese works out of the box, and
+full-width and half-width characters are treated alike. Every search term must match. Results
+show the page, the matching heading and a highlighted snippet. Press `/` or `Ctrl`/`⌘`+`K` to
+focus the box. On multilingual sites, results follow the current language.
+
+## Math and diagrams
+
+Both are opt-in and their libraries load only on pages that use them.
+
+```html
+<md-book manifest="/manifest.json" math mermaid></md-book>
+```
+
+- **Math:** `$inline$` and `$$display$$` are typeset with KaTeX. Text like "costs $5 and $10" is
+  left alone.
+- **Diagrams:** fence a block with `mermaid`. Diagrams follow the light/dark theme.
+
+The libraries are loaded from jsDelivr by default. To self-host, pass your own loader:
+
+```ts
+await mount('#app', {
+  math: { load: () => import('katex') },
+  mermaid: { load: () => import('mermaid') },
+});
+```
+
+For static builds, install `katex` (`npm i -D katex`) and `md-book build --math` pre-renders
+formulas at build time.
+
+## Multiple languages
+
+**UI language.** The text md-book generates itself (pager, buttons, blog labels, messages) comes
+in `en` and `ja`.
+
+```html
+<md-book manifest="/manifest.json" lang="ja"></md-book>
+```
+
+```ts
+mount('#app', { locale: 'ja', strings: { copy: 'クリップボードへ' } }); // override single strings
+```
+
+**Translated content.** The default language lives at the content root; every other language
+lives in a folder named after its code.
+
+```
+content/guide/intro.md      →  /guide/intro       (default: en)
+content/ja/guide/intro.md   →  /ja/guide/intro    (ja)
+content/ja/index.md         →  /ja                (ja home)
+```
+
+```bash
+npx md-book dev --content ./content --locales en,ja
+npx md-book build ./content --locales en,ja        # or en:English,ja:日本語
+```
+
+The site then gets a language switcher that jumps to the same page in the other language,
+per-language navigation, blog and search, `<html lang>`, and `hreflang` alternates.
+
+## Vertical writing
+
+For Japanese text such as tanka, set `writing: vertical` in a page's front matter to lay the
+whole page out top-to-bottom, right-to-left. Use `:::vertical` to set a single block vertically
+inside a normal page, and `:::tanka` for poems that keep their line breaks. Ruby is written as
+`{漢字|かんじ}`.
+
+```md
+---
+title: 短歌
+writing: vertical
+---
+
+:::tanka
+{東海|とうかい}の{小島|こじま}の{磯|いそ}の{白砂|しろすな}に
+われ{泣|な}きぬれて
+{蟹|かに}とたはむる
+:::
+```
+
+## Theming
+
+The look is controlled by CSS variables prefixed `--md-book-*`. **A theme is a stylesheet that
+redefines some of them**, loaded after `style.css`:
+
+```ts
+import '@ibitsuki0296/md-book/style.css';
+import '@ibitsuki0296/md-book/themes/ink.css';   // a bundled theme (optional)
+import './my-theme.css';                         // your overrides
+```
+
+```css
+/* my-theme.css */
+:root {
+  --md-book-brand-600: #0d9488;
+  --md-book-font-body: "Noto Sans JP", system-ui, sans-serif;
+  --md-book-measure: 52rem;            /* reading width */
+}
+:root[data-theme="dark"] {
+  --md-book-color-bg: #0b1020;
+}
+```
+
+md-book's own styles sit inside CSS `@layer`s, so your plain CSS always wins — no `!important`
+needed. `themes/default.css` lists every variable and is a good starting template. Two themes
+ship in the package: `default` and `ink`.
+
+Light/dark: the theme follows the system setting until the reader uses the header toggle (their
+choice is remembered). Paste `themeInitScript()` into `<head>` to avoid a flash of the wrong
+theme.
+
+**Theme playground.** `npm run playground` (in this repository) opens a live editor: change
+colours, fonts and spacing, with light and dark edited separately, then copy or download the
+result as a stylesheet.
+
+## Command line
+
+```bash
+md-book manifest <contentDir>        # scan Markdown into manifest.json
+md-book search-index <contentDir>    # build search-index.json
+md-book feed <contentDir>            # write RSS / Atom / JSON feeds
+md-book build <contentDir>           # pre-render a static site
+md-book dev                          # dev server with live reload
+```
+
+Run `md-book --help` for every option.
+
+## Package contents
+
+| Import | What it is |
+|---|---|
+| `@ibitsuki0296/md-book` | Pure functions: `renderMarkdown`, manifest and nav helpers, blog helpers, feeds, search, i18n. No DOM, no filesystem. |
+| `@ibitsuki0296/md-book/runtime` | `<md-book>`, `mount()`, theme controller and other browser code |
+| `@ibitsuki0296/md-book/node` | `buildSite`, `renderSite` and the generators |
+| `@ibitsuki0296/md-book/{vite,astro,next}` | Framework adapters |
+| `@ibitsuki0296/md-book/style.css`, `/themes/*` | Stylesheet and bundled themes |
+| `dist/md-book.global.js` | Single-file browser bundle for a `<script>` tag (exposes `window.MdBook`); `md-book.global.js.sri` holds its Subresource Integrity hash |
+
+Everything is ESM, with CommonJS builds and TypeScript types included.
+
+## Why "md-book"?
+
+The bare npm name `md-book` was taken, so the package is published as
+`@ibitsuki0296/md-book`. The project, repository and CLI are still called `md-book`.
 
 ## Development
 
 ```bash
 npm install
-npm test              # vitest
-npm run typecheck     # tsc --noEmit
-npm run build         # tsup -> dist/ (ESM + CJS + d.ts + CLI + adapters + CSS) + SRI hash
-npm run lint          # biome
-npm run size          # size-limit (CDN bundle budget)
+npm test              # Vitest
+npm run typecheck
+npm run lint          # Biome
+npm run build         # tsup + postbuild → dist/
+npm run size          # bundle size budget
 npm run validate:tokens
-npm run example       # build + serve examples/docs at :4173
-npm run playground    # build + serve the theme playground at :4180
+npm run example       # build and serve examples/docs at :4173
+npm run playground    # theme playground at :4180
 ```
 
-`examples/docs/` is both the dev-server fixture and the documentation site
-(md-book dogfooding itself).
-
-Releases are driven by [Changesets](https://github.com/changesets/changesets):
-`npx changeset` to note a change, then CI runs `npm run release` (build +
-`changeset publish` with npm provenance) on merge to `main`. `pre-commit` runs
-Biome + typecheck via lefthook; CI additionally runs tests, build, size, and the
-token validator. `dist/md-book.global.js.sri` holds the Subresource Integrity
-hash for the CDN `<script>`.
-
-## Roadmap
-
-See [`plans/…dynamic-hinton.md`](../../.claude/plans/javascript-markdown-dynamic-hinton.md)
-for the full requirements doc. Milestones:
-
-| | |
-|---|---|
-| **M1 core** *(done)* | Markdown pipeline, front matter, TOC, link rewrite, containers |
-| **M2 content model** *(done)* | Manifest type + validation, route resolution, nav/sidebar, prev/next, `md-book manifest` + `md-book dev` |
-| **M3 runtime UI** *(done)* | `<md-book>` element + `mount()`, client router, app shell, page loader/cache, scroll-spy, code copy, CDN global build |
-| **M4 theming** *(done)* | `--md-book-*` token contract, `@layer` stylesheet, light/dark, theme controller + FOUC guard + header toggle, reference themes, token validator |
-| **M5 blog** *(done)* | `collectPosts` + date sort, `paginate`, tag/category grouping, list / pagination / taxonomy routes in the runtime, `generateFeed` (RSS/Atom/JSON) + `md-book feed` |
-| **M6 hardening** *(done)* | SEO head (canonical / OG / Twitter / Article JSON-LD), a11y structure + tests, `size-limit`, SRI hash, GitHub Actions CI, lefthook, Changesets, docs content, `0.1.0` |
-| **UI i18n** *(done, unreleased)* | `en` / `ja` string tables (`src/core/i18n.ts`), `mount({ locale })` + `<md-book lang>`, `<html lang>` / `og:locale` sync, `Intl`-formatted blog dates |
-| **Search** *(done, unreleased)* | `md-book search-index`, CJK-friendly client search, header search box (`/` and `⌘K`), per-locale results |
-| **Math & diagrams** *(done, unreleased)* | `$…$` / `$$…$$` KaTeX and ```` ```mermaid ```` diagrams, lazy-loaded, theme-aware, build-time KaTeX |
-| **Content i18n** *(done, unreleased)* | Locale routing, `--locales`, language switcher, per-locale nav / blog / search, hreflang |
-| **SSG** *(done, unreleased)* | `md-book build`: pre-rendered pages + sitemap + feeds, runtime takes over on load |
-| **Adapters** *(done, unreleased)* | `@ibitsuki0296/md-book/{vite,astro,next,node}` |
+`examples/docs/` is both the development fixture and the demo site's content — md-book documents
+itself. Releases use [Changesets](https://github.com/changesets/changesets): run `npx changeset`
+for any user-facing change; CI publishes on merge to `main`.
 
 ## License
 
-MIT © Hazuki ABE
+MIT © Hazuki ABE. The browser bundle includes third-party code; its licences are in
+`dist/THIRD_PARTY_LICENSES.txt`, which is shipped with the package and with `md-book build` output.
