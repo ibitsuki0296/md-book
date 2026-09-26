@@ -1,5 +1,11 @@
 # @ibitsuki0296/md-book
 
+## 0.2.1
+
+### Patch Changes
+
+- 217cda7: Ship `THIRD_PARTY_LICENSES.txt` (licences of the packages bundled into the CDN/CJS builds), reference it from a banner in `md-book.global.js`, and copy it next to the runtime in `md-book build` output.
+
 ## 0.2.0
 
 ### Minor Changes
