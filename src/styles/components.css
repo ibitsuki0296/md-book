@@ -768,6 +768,302 @@
     font-size: 0.85em;
   }
 
+  /* --- search box (header) --------------------------------------------- */
+  .md-book-navbar-search[hidden] {
+    display: none;
+  }
+
+  .md-book-search {
+    position: relative;
+  }
+
+  .md-book-search__input {
+    width: 13rem;
+    height: 2.25rem;
+    padding: 0 2.25rem 0 0.75rem;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--md-book-color-fg);
+    background: var(--md-book-color-surface);
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
+    border-radius: var(--md-book-radius-sm);
+    transition: border-color var(--md-book-transition), width var(--md-book-transition);
+    appearance: none;
+  }
+
+  .md-book-search__input::placeholder {
+    color: var(--md-book-color-fg-muted);
+  }
+
+  .md-book-search__input:focus {
+    width: 17rem;
+    border-color: var(--md-book-color-accent);
+    outline: none;
+  }
+
+  .md-book-search__input:focus-visible {
+    outline: var(--md-book-focus-ring);
+    outline-offset: 1px;
+  }
+
+  .md-book-search__input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  /* The "/" shortcut hint sits inside the field and yields while typing. */
+  .md-book-search__hint {
+    position: absolute;
+    top: 50%;
+    right: 0.6rem;
+    translate: 0 -50%;
+    padding: 0 0.35rem;
+    font: inherit;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--md-book-color-fg-muted);
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
+    border-radius: var(--md-book-radius-sm);
+    pointer-events: none;
+  }
+
+  .md-book-search__input:focus ~ .md-book-search__hint,
+  .md-book-search__input:not(:placeholder-shown) ~ .md-book-search__hint {
+    display: none;
+  }
+
+  .md-book-search__panel {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    z-index: 20;
+    width: min(30rem, calc(100vw - 2rem));
+    max-height: min(28rem, calc(100vh - var(--md-book-header-height) - 2rem));
+    overflow-y: auto;
+    padding: 0.35rem;
+    background: var(--md-book-color-bg);
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
+    border-radius: var(--md-book-radius);
+    box-shadow: var(--md-book-shadow);
+    overscroll-behavior: contain;
+  }
+
+  .md-book-search__panel[hidden] {
+    display: none;
+  }
+
+  .md-book-search__status {
+    margin: 0;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--md-book-color-fg-muted);
+  }
+
+  .md-book-search__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .md-book-search__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.5rem 0.6rem;
+    color: var(--md-book-color-fg);
+    border-radius: var(--md-book-radius-sm);
+  }
+
+  .md-book-search__link:hover,
+  .md-book-search__item.is-active .md-book-search__link {
+    color: var(--md-book-color-fg);
+    background: var(--md-book-color-accent-muted);
+    text-decoration: none;
+  }
+
+  .md-book-search__title {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .md-book-search__heading {
+    font-size: 0.78rem;
+    color: var(--md-book-color-accent);
+  }
+
+  .md-book-search__snippet {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--md-book-color-fg-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .md-book-search__snippet mark {
+    color: var(--md-book-color-fg);
+    background: color-mix(in srgb, var(--md-book-color-warning) 30%, transparent);
+    border-radius: 0.15em;
+  }
+
+  @media (max-width: 760px) {
+    .md-book-search__hint {
+      display: none;
+    }
+
+    .md-book-search__input {
+      width: 8rem;
+    }
+
+    .md-book-search__input:focus {
+      width: 11rem;
+    }
+
+    .md-book-search__panel {
+      position: fixed;
+      top: calc(var(--md-book-header-height) + 0.4rem);
+      right: 1rem;
+      left: 1rem;
+      width: auto;
+    }
+  }
+
+  /* Phones: the box collapses to a magnifier and expands over the header on focus. */
+  @media (max-width: 560px) {
+    .md-book-search__input {
+      width: 2.25rem;
+      padding: 0;
+      color: transparent;
+      caret-color: transparent;
+      cursor: pointer;
+    }
+
+    .md-book-search__input::placeholder {
+      color: transparent;
+    }
+
+    .md-book-search::before {
+      content: "";
+      position: absolute;
+      top: 0.6rem;
+      left: 0.62rem;
+      width: 0.62rem;
+      height: 0.62rem;
+      border: 2px solid var(--md-book-color-fg-muted);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .md-book-search::after {
+      content: "";
+      position: absolute;
+      top: 1.42rem;
+      left: 1.28rem;
+      width: 0.4rem;
+      height: 2px;
+      background: var(--md-book-color-fg-muted);
+      rotate: 45deg;
+      pointer-events: none;
+    }
+
+    .md-book-search:focus-within::before,
+    .md-book-search:focus-within::after {
+      display: none;
+    }
+
+    .md-book-search__input:focus {
+      position: fixed;
+      top: 0.6rem;
+      right: 1rem;
+      left: 1rem;
+      z-index: 21;
+      width: auto;
+      padding: 0 0.75rem;
+      color: var(--md-book-color-fg);
+      caret-color: auto;
+      cursor: text;
+      background: var(--md-book-color-bg);
+    }
+
+    .md-book-search__input:focus::placeholder {
+      color: var(--md-book-color-fg-muted);
+    }
+
+    .md-book-lang__select {
+      max-width: 5.75rem;
+      padding: 0 0.25rem;
+    }
+  }
+
+  /* --- language switcher (content-level i18n) -------------------------- */
+  .md-book-lang__select {
+    height: 2.25rem;
+    padding: 0 0.5rem;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--md-book-color-fg-muted);
+    background: transparent;
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
+    border-radius: var(--md-book-radius-sm);
+    cursor: pointer;
+    transition: color var(--md-book-transition), background-color var(--md-book-transition);
+  }
+
+  .md-book-lang__select:hover {
+    color: var(--md-book-color-fg);
+    background: var(--md-book-color-surface-hover);
+  }
+
+  /* --- math + diagrams -------------------------------------------------- */
+  /* Before KaTeX loads (or if it never does) the TeX source shows as code. */
+  .md-book-math:not(.md-book-math--rendered) {
+    font-family: var(--md-book-font-mono);
+    font-size: 0.9em;
+  }
+
+  .md-book-math--display {
+    display: block;
+    margin: 1.25rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+  }
+
+  span.md-book-math--display {
+    display: inline;
+  }
+
+  .md-book-article--vertical .md-book-math--display {
+    overflow: visible;
+  }
+
+  .md-book-mermaid {
+    margin: 1.25rem 0;
+    padding: 1rem;
+    overflow-x: auto;
+    text-align: center;
+    color: var(--md-book-color-code-fg);
+    background: var(--md-book-color-code-bg);
+    border: var(--md-book-border-width) solid var(--md-book-color-border);
+    border-radius: var(--md-book-radius);
+  }
+
+  .md-book-mermaid--rendered {
+    background: transparent;
+  }
+
+  .md-book-mermaid:not(.md-book-mermaid--rendered) {
+    text-align: start;
+    font-family: var(--md-book-font-mono);
+    font-size: 0.85rem;
+  }
+
+  .md-book-mermaid--error {
+    border-color: var(--md-book-color-danger);
+  }
+
+  .md-book-mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+
   /* --- misc ---------------------------------------------------------- */
   .md-book-page-footer {
     margin-top: 2rem;

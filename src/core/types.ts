@@ -85,6 +85,18 @@ export interface RenderOptions {
   /** Enable footnotes. Default `true`. */
   footnotes?: boolean;
   /**
+   * TeX math: `$inline$`, `$$display$$`. Off by default (dollar signs are common
+   * in prose). `true` emits escaped TeX in `.md-book-math` elements for the
+   * runtime to typeset; `{ render }` typesets at render time instead (SSG), e.g.
+   * `render: (tex, display) => katex.renderToString(tex, { displayMode: display })`.
+   */
+  math?: boolean | { render?: (tex: string, displayMode: boolean) => string };
+  /**
+   * Turn ```mermaid fences into `<pre class="md-book-mermaid">` for the runtime
+   * to draw as diagrams. Off by default.
+   */
+  mermaid?: boolean;
+  /**
    * Built-in syntax highlighting for fenced code (js/ts, json, css, html, sh,
    * yaml, python, diff). Default `true`. Unknown languages stay plain.
    */

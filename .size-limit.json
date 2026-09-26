@@ -3,13 +3,13 @@
     "name": "CDN bundle — md-book.global.js (gzip)",
     "path": "dist/md-book.global.js",
     "gzip": true,
-    "limit": "95 kB"
+    "limit": "100 kB"
   },
   {
     "name": "runtime.mjs — our code, deps external (gzip)",
     "path": "dist/runtime.mjs",
     "gzip": true,
-    "limit": "14 kB"
+    "limit": "16 kB"
   },
   {
     "name": "index.mjs — core entry (gzip)",

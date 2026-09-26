@@ -22,6 +22,8 @@ export function renderMarkdown(source: string, options: RenderOptions = {}): Ren
     footnotes: options.footnotes,
     highlight: options.highlight,
     linkRewrite: options.linkRewrite,
+    math: options.math,
+    mermaid: options.mermaid,
     ruby: options.ruby,
   });
 

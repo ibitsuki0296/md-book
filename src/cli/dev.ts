@@ -1,7 +1,9 @@
 import { createReadStream, existsSync, readFileSync, statSync, watch } from 'node:fs';
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http';
 import { extname, join, normalize, resolve } from 'node:path';
+import type { LocaleConfig } from '../core/locale.js';
 import { type GenerateManifestOptions, generateManifest } from './manifest.js';
+import { generateSearchIndex } from './search.js';
 
 export interface DevServerOptions {
   /** Static root served to the browser (contains index.html). */
@@ -9,6 +11,9 @@ export interface DevServerOptions {
   /** Markdown source directory scanned for `/manifest.json`. */
   contentDir: string;
   base?: string;
+  /** Content locales (see `md-book manifest --locales`). */
+  locales?: ReadonlyArray<string | LocaleConfig>;
+  defaultLocale?: string;
   port?: number;
   host?: string;
 }
@@ -52,14 +57,18 @@ export function startDevServer(options: DevServerOptions): Promise<DevServer> {
     contentDir,
     base,
     includeDrafts: true,
+    locales: options.locales,
+    defaultLocale: options.defaultLocale,
     // Point the runtime at the raw-Markdown mount rather than the site root.
     contentBase: joinBase(base, '@content'),
   };
   const clients = new Set<ServerResponse>();
   let manifestCache: string | null = null;
+  let searchCache: string | null = null;
 
   const invalidate = () => {
     manifestCache = null;
+    searchCache = null;
     for (const res of clients) res.write('data: reload\n\n');
   };
   const manifest = () => {
@@ -69,8 +78,20 @@ export function startDevServer(options: DevServerOptions): Promise<DevServer> {
     return manifestCache;
   };
 
+  const search = () => {
+    searchCache ??= JSON.stringify(
+      generateSearchIndex({
+        contentDir,
+        includeDrafts: true,
+        locales: options.locales,
+        defaultLocale: options.defaultLocale,
+      }),
+    );
+    return searchCache;
+  };
+
   const server = createServer((req, res) => {
-    handle(req, res, { root, contentDir, base, manifest, clients }).catch((err) => {
+    handle(req, res, { root, contentDir, base, manifest, search, clients }).catch((err) => {
       res.statusCode = 500;
       res.end(`md-book dev: ${(err as Error).message}`);
     });
@@ -106,6 +127,7 @@ interface HandleContext {
   contentDir: string;
   base: string;
   manifest: () => string;
+  search: () => string;
   clients: Set<ServerResponse>;
 }
 
@@ -132,6 +154,12 @@ async function handle(
   if (pathname === joinBase(ctx.base, 'manifest.json') || pathname === '/manifest.json') {
     res.writeHead(200, { 'content-type': MIME['.json']!, 'cache-control': 'no-store' });
     res.end(ctx.manifest());
+    return;
+  }
+
+  if (pathname === joinBase(ctx.base, 'search-index.json') || pathname === '/search-index.json') {
+    res.writeHead(200, { 'content-type': MIME['.json']!, 'cache-control': 'no-store' });
+    res.end(ctx.search());
     return;
   }
 

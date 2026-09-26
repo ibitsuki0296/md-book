@@ -5,11 +5,19 @@ import { highlightCode } from './highlight.js';
 import { anchorTocPlugin } from './plugins/anchor-toc.js';
 import { containersPlugin } from './plugins/containers.js';
 import { linkRewritePlugin } from './plugins/link-rewrite.js';
+import { mathPlugin } from './plugins/math.js';
 import { rubyPlugin } from './plugins/ruby.js';
 
 export type MarkdownConfig = Pick<
   RenderOptions,
-  'allowHtml' | 'containers' | 'footnotes' | 'highlight' | 'linkRewrite' | 'ruby'
+  | 'allowHtml'
+  | 'containers'
+  | 'footnotes'
+  | 'highlight'
+  | 'linkRewrite'
+  | 'math'
+  | 'mermaid'
+  | 'ruby'
 >;
 
 /**
@@ -33,8 +41,11 @@ export function createMarkdown(config: MarkdownConfig = {}): MarkdownIt {
   if (config.footnotes ?? true) md.use(footnote);
   if (config.containers ?? true) containersPlugin(md);
   if (config.ruby ?? true) rubyPlugin(md);
+  if (config.math) mathPlugin(md, typeof config.math === 'object' ? config.math.render : undefined);
   md.use(anchorTocPlugin);
   if (config.linkRewrite) linkRewritePlugin(md, config.linkRewrite);
+
+  if (config.mermaid) mermaidFence(md);
 
   // Mark external links so themes/runtime can decorate them.
   const defaultLinkOpen =
@@ -50,4 +61,18 @@ export function createMarkdown(config: MarkdownConfig = {}): MarkdownIt {
   };
 
   return md;
+}
+
+/** ```mermaid fences become `<pre class="md-book-mermaid">` (escaped source) for the runtime to draw. */
+function mermaidFence(md: MarkdownIt): void {
+  const fallback =
+    md.renderer.rules.fence ??
+    ((tokens, idx, opts, _env, self) => self.renderToken(tokens, idx, opts));
+  md.renderer.rules.fence = (tokens, idx, opts, env, self) => {
+    const token = tokens[idx]!;
+    if (token.info.trim().split(/\s+/)[0] === 'mermaid') {
+      return `<pre class="md-book-mermaid">${md.utils.escapeHtml(token.content)}</pre>\n`;
+    }
+    return fallback(tokens, idx, opts, env, self);
+  };
 }

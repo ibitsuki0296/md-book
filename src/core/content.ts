@@ -1,3 +1,4 @@
+import type { LocaleConfig } from './locale.js';
 import type { FrontMatter } from './types.js';
 
 /** Current manifest schema version. Bump on breaking shape changes. */
@@ -15,6 +16,8 @@ export interface ManifestEntry {
   order?: number;
   /** Source last-modified time in epoch ms, when the generator provides it. */
   mtime?: number;
+  /** Locale of the page when the site is localised (see {@link Manifest.locales}). */
+  locale?: string;
 }
 
 export interface Manifest {
@@ -26,6 +29,13 @@ export interface Manifest {
   /** Optional site title / description, surfaced by the runtime for `<title>` and meta. */
   title?: string;
   description?: string;
+  /**
+   * Content-level i18n: the site's locales. The default locale lives at the
+   * content root, every other locale under `/<code>/`. Omitted = not localised.
+   */
+  locales?: LocaleConfig[];
+  /** Default locale code; must be one of `locales`. Defaults to the first. */
+  defaultLocale?: string;
   entries: ManifestEntry[];
   /** ISO timestamp of generation. */
   generatedAt: string;
@@ -49,6 +59,11 @@ export interface RouteNode {
 export interface NavItem {
   text: string;
   link: string;
+}
+
+export interface NavOptions {
+  /** Build the nav from the children of this route (e.g. a locale root `/ja`). Default: the site root. */
+  section?: string;
 }
 
 export interface SidebarOptions {
@@ -147,9 +162,10 @@ export function resolveRoutes(entries: ManifestEntry[]): RouteNode {
 }
 
 /** Top-level navigation: one item per first-level section, linking to its landing page. */
-export function buildNav(entries: ManifestEntry[]): NavItem[] {
+export function buildNav(entries: ManifestEntry[], options: NavOptions = {}): NavItem[] {
   const root = resolveRoutes(entries);
-  return root.children.map((node) => ({
+  const scope = options.section && options.section !== '/' ? findNode(root, options.section) : root;
+  return (scope?.children ?? []).map((node) => ({
     text: node.title,
     link: firstLink(node) ?? node.path,
   }));
@@ -196,6 +212,29 @@ export function getPrevNext(pages: ManifestEntry[], currentPath: string): PrevNe
   return result;
 }
 
+/**
+ * Returns a manifest whose entry routes are relative to the site base. A
+ * manifest generated with `--base /docs/` bakes the prefix into every route,
+ * but the runtime router works with base-stripped routes — this normalises the
+ * former into the latter. A no-op for base `/`.
+ */
+export function stripManifestBase(manifest: Manifest): Manifest {
+  const base =
+    manifest.base === '' || manifest.base === '/'
+      ? ''
+      : `/${manifest.base.replace(/^\/+|\/+$/g, '')}`;
+  if (!base) return manifest;
+  return {
+    ...manifest,
+    entries: manifest.entries.map((entry) => {
+      if (entry.path === base) return { ...entry, path: '/' };
+      return entry.path.startsWith(`${base}/`)
+        ? { ...entry, path: entry.path.slice(base.length) }
+        : entry;
+    }),
+  };
+}
+
 /** Validates the shape of a parsed manifest, throwing on the first problem. */
 export function assertManifest(value: unknown): asserts value is Manifest {
   if (typeof value !== 'object' || value === null) throw new Error('manifest: not an object');
@@ -206,6 +245,14 @@ export function assertManifest(value: unknown): asserts value is Manifest {
     );
   }
   if (typeof m.base !== 'string') throw new Error('manifest: `base` must be a string');
+  if (m.locales !== undefined) {
+    if (!Array.isArray(m.locales)) throw new Error('manifest: `locales` must be an array');
+    for (const [i, raw] of m.locales.entries()) {
+      const code = (raw as Record<string, unknown> | null)?.code;
+      if (typeof code !== 'string')
+        throw new Error(`manifest: locales[${i}].code must be a string`);
+    }
+  }
   if (!Array.isArray(m.entries)) throw new Error('manifest: `entries` must be an array');
   for (const [i, raw] of m.entries.entries()) {
     const e = raw as Record<string, unknown>;

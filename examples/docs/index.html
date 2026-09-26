@@ -25,16 +25,20 @@
     <!-- <link rel="stylesheet" href="/themes/ink.css" /> -->
   </head>
   <body>
-    <!-- lang="ja" localises the generated UI (pager, code-copy, blog chrome,
-         theme toggle, messages) and sets <html lang>. Omit it for English. -->
+    <!-- The manifest lists the site's locales (md-book dev --locales en,ja): the UI language,
+         <html lang>, sidebar, blog and search all follow the language of the current page.
+         (On a single-language site, lang="ja" would localise just the generated UI.)
+         search / math / mermaid switch on the search box, KaTeX and Mermaid diagrams. -->
     <md-book
       manifest="/manifest.json"
       base="/"
       router="history"
       theme="system"
-      lang="ja"
       blog
       blog-per-page="5"
+      search
+      math
+      mermaid
       site-url="https://md-book.example/"
     >
       <a slot="navbar-end" href="/tags">Tags</a>

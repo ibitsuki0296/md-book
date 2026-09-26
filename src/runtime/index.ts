@@ -16,6 +16,7 @@ export { applyHead, type HeadInput, type SeoConfig } from './head.js';
 export { mount, type MountHandle, type MountOptions } from './mount.js';
 export { PageLoader, PageNotFoundError } from './page.js';
 export { createRouter, type Router, type RouterMode } from './router.js';
+export { createSearchBox, type SearchBox, type SearchBoxOptions } from './search.js';
 export {
   createThemeController,
   DEFAULT_THEME_STORAGE_KEY,
@@ -25,4 +26,12 @@ export {
   type ThemeMode,
   themeInitScript,
 } from './theme.js';
+export {
+  type KatexLike,
+  type MathOptions,
+  type MermaidLike,
+  type MermaidOptions,
+  typesetDiagrams,
+  typesetMath,
+} from './typeset.js';
 export { version } from '../version.js';

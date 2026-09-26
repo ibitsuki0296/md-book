@@ -30,6 +30,18 @@ export interface UIStrings {
   previous: string;
   next: string;
 
+  // Search
+  searchLabel: string;
+  searchPlaceholder: string;
+  searchResultsLabel: string;
+  searchLoading: string;
+  searchFailed: string;
+  searchNoResults: (query: string) => string;
+  searchResultCount: (count: number) => string;
+
+  // Language switcher (content-level i18n)
+  languageLabel: string;
+
   // Theme toggle
   switchToLight: string;
   switchToDark: string;
@@ -75,6 +87,16 @@ const en: UIStrings = {
   previous: 'Previous',
   next: 'Next',
 
+  searchLabel: 'Search',
+  searchPlaceholder: 'Search',
+  searchResultsLabel: 'Search results',
+  searchLoading: 'Loading…',
+  searchFailed: 'Search is unavailable.',
+  searchNoResults: (query) => `No results for “${query}”.`,
+  searchResultCount: (count) => `${count} ${count === 1 ? 'result' : 'results'}`,
+
+  languageLabel: 'Language',
+
   switchToLight: 'Switch to light theme',
   switchToDark: 'Switch to dark theme',
 
@@ -115,6 +137,16 @@ const ja: UIStrings = {
   menuLabel: 'メニュー',
   previous: '前へ',
   next: '次へ',
+
+  searchLabel: '検索',
+  searchPlaceholder: '検索',
+  searchResultsLabel: '検索結果',
+  searchLoading: '読み込み中…',
+  searchFailed: '検索を利用できません。',
+  searchNoResults: (query) => `“${query}” に一致する結果はありません。`,
+  searchResultCount: (count) => `${count} 件の結果`,
+
+  languageLabel: '言語',
 
   switchToLight: 'ライトテーマに切り替え',
   switchToDark: 'ダークテーマに切り替え',

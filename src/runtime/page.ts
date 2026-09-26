@@ -1,6 +1,6 @@
 import type { Manifest, ManifestEntry } from '../core/content.js';
 import { renderMarkdown } from '../core/render.js';
-import type { RenderResult } from '../core/types.js';
+import type { RenderOptions, RenderResult } from '../core/types.js';
 
 export interface LoadedPage extends RenderResult {
   entry: ManifestEntry;
@@ -12,6 +12,8 @@ export interface PageLoaderOptions {
   /** Absolute URL the manifest was fetched from; used to resolve relative `file` paths. */
   manifestUrl?: string;
   tocDepth?: [number, number];
+  /** Extra Markdown features to enable (`math`, `mermaid`). */
+  render?: Pick<RenderOptions, 'math' | 'mermaid'>;
   /** Override how a raw Markdown file is fetched (tests, custom transports). */
   fetchText?: (url: string) => Promise<string>;
 }
@@ -24,6 +26,7 @@ export class PageLoader {
   private readonly inflight = new Map<string, Promise<LoadedPage>>();
   private readonly base: string;
   private readonly tocDepth?: [number, number];
+  private readonly renderOptions?: Pick<RenderOptions, 'math' | 'mermaid'>;
   private readonly contentRoot: string;
   private readonly fetchText: (url: string) => Promise<string>;
 
@@ -31,6 +34,7 @@ export class PageLoader {
     this.manifest = options.manifest;
     this.base = options.manifest.base || '/';
     this.tocDepth = options.tocDepth;
+    this.renderOptions = options.render;
     this.fetchText = options.fetchText ?? defaultFetchText;
     this.contentRoot = resolveContentRoot(options.manifest, options.manifestUrl);
     for (const entry of options.manifest.entries) this.byPath.set(entry.path, entry);
@@ -65,6 +69,7 @@ export class PageLoader {
     const promise = this.fetchText(this.fileUrl(entry))
       .then((text) => {
         const rendered = renderMarkdown(text, {
+          ...this.renderOptions,
           tocDepth: this.tocDepth,
           linkRewrite: { currentPath: path, base: this.base },
         });
