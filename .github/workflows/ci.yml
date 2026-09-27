@@ -41,6 +41,12 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      # The npm bundled with actions/setup-node's Node 24 can be older than
+      # 11.5.1, the minimum that knows how to exchange the OIDC token for
+      # trusted publishing; an old npm fails with a plain ENEEDAUTH/404
+      # instead of a trusted-publishing-specific error. Force a known-good
+      # version (matches package.json's `packageManager`).
+      - run: npm install -g npm@11.9.0
       - run: npm ci
       - run: npm run build
       - uses: changesets/action@v1
