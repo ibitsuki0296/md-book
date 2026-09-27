@@ -49,18 +49,9 @@ jobs:
       - run: npm install -g npm@11.9.0
       - run: npm ci
       - run: npm run build
-      # TEMPORARY: diagnose the OIDC ENEEDAUTH failure. Doesn't print the
-      # token itself, only whether GitHub handed the job the two env vars
-      # npm's OIDC exchange needs.
-      - run: |
-          echo "ACTIONS_ID_TOKEN_REQUEST_URL set: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
-          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN set: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+yes}"
       - uses: changesets/action@v1
         with:
           version: npm run version
           publish: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # TEMPORARY: surface npm's internal OIDC exchange logging
-          # (lib/utils/oidc.js) to see exactly where it gives up.
-          NPM_CONFIG_LOGLEVEL: verbose
