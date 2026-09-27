@@ -1,5 +1,13 @@
 # @ibitsuki0296/md-book
 
+## 0.2.2
+
+### Patch Changes
+
+- 9a9a1d0: Document the full set of blog config knobs (`dir`, `perPage`, `tagsBase`,
+  `categoriesBase`) in the README, and which of the `<md-book>` attribute,
+  `mount()` option, and `md-book build` flag surfaces each one is available on.
+
 ## 0.2.1
 
 ### Patch Changes
