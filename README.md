@@ -216,7 +216,7 @@ prefetching, code copy buttons, TOC scroll-spy, a light/dark toggle and SEO tags
 | `heading` | Site title for the header and `<title>` |
 | `lang` | UI language: `en` or `ja` |
 | `theme` | Initial mode: `light`, `dark` or `system` |
-| `blog`, `blog-dir`, `blog-per-page` | Enable and configure the blog |
+| `blog`, `blog-dir`, `blog-per-page` | Enable and configure the blog (full option list under [Blog](#blog)) |
 | `search` | Add the search box |
 | `math`, `mermaid` | Turn on math and diagrams |
 | `site-url` | Absolute site URL for canonical / Open Graph links |
@@ -297,6 +297,18 @@ Any dated Markdown file under `blog/` is a post. Turn the blog on with `blog` (a
 - `/blog` — posts newest first, paginated (`/blog/page/2`, …). If `blog/index.md` exists, its
   text is shown above the list.
 - `/tags`, `/tags/:slug`, `/categories`, `/categories/:slug` — taxonomy pages.
+
+All blog config knobs, with their default and where each is settable:
+
+| Setting | Default | `<md-book>` attribute | `mount()` `blog` option | `md-book build` flag |
+|---|---|---|---|---|
+| Enable the blog | off | `blog` | `true` | `--blog` |
+| Post directory | `blog` | `blog-dir` | `dir` | `--blog-dir <name>` |
+| Posts per page | `10` | `blog-per-page` | `perPage` | `--blog-per-page <n>` |
+| Tag index base path | `/tags` | — | `tagsBase` | — |
+| Category index base path | `/categories` | — | `categoriesBase` | — |
+
+`tagsBase` and `categoriesBase` are JS-only — pass them through `mount({ blog: { tagsBase, categoriesBase } })`; there is no `<md-book>` attribute or CLI flag for them yet.
 
 Drafts and future-dated posts are hidden. Generate feeds with:
 
