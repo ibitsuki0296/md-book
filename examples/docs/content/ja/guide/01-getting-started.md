@@ -24,4 +24,4 @@ npx md-book manifest ./content --locales en,ja
 
 ## ページを表示する
 
-見た目の変え方は [テーマ](../../guide/02-theming.md) を参照してください。
+見た目の変え方は [テーマ](./theming.md) を参照してください。
