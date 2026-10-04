@@ -17,6 +17,9 @@ hero:
     - text: Read the blog
       link: /blog
       theme: alt
+    - text: GitHub
+      link: https://github.com/ibitsuki0296/md-book
+      theme: alt
 features:
   - icon: "✎"
     title: Just Markdown

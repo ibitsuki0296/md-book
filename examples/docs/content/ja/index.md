@@ -17,6 +17,9 @@ hero:
     - text: 検索・数式・図
       link: /ja/guide/search-math-diagrams
       theme: alt
+    - text: GitHub
+      link: https://github.com/ibitsuki0296/md-book
+      theme: alt
 features:
   - icon: "✎"
     title: Markdown だけ
