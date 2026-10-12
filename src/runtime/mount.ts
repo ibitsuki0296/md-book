@@ -1,6 +1,7 @@
 import {
   BLOG_DEFAULTS,
   type BlogRuntimeConfig,
+  hidesSidebar,
   localizeBlogConfig,
   resolveBlogView,
 } from '../core/blog-views.js';
@@ -314,24 +315,28 @@ export async function mount(
           return;
         }
         let leadingHTML = '';
+        let ownFrontMatter: Record<string, unknown> | undefined;
         if (view.hasOwnPage) {
           try {
             const page = await loader.load(path);
             if (token !== renderToken) return;
             leadingHTML = page.html;
+            ownFrontMatter = page.frontMatter;
           } catch {
             // fall back to the generated list only
           }
         }
+        const noSidebar = hidesSidebar(path, ownFrontMatter, blog);
         app.renderPage({
           path,
           title: view.title,
           contentHTML: leadingHTML + view.html,
-          sidebar: buildSidebar(entriesOf(code), {
-            section: view.section ?? undefined,
-          }),
+          sidebar: noSidebar
+            ? []
+            : buildSidebar(entriesOf(code), { section: view.section ?? undefined }),
           toc: [],
           prevNext: {},
+          noSidebar,
         });
         addCodeCopyButtons(app.article, t);
         typeset();
@@ -379,6 +384,7 @@ export async function mount(
       const page = await loader.load(resolved);
       if (token !== renderToken) return; // superseded by a newer navigation
 
+      const noSidebar = hidesSidebar(resolved, page.frontMatter, blog);
       app.renderPage({
         path: resolved,
         title: page.frontMatter.title ?? entryTitle(page.entry),
@@ -386,11 +392,14 @@ export async function mount(
           page.frontMatter.layout === 'home'
             ? `${renderHome(page.frontMatter, (link) => router.href(link))}\n${page.html}`
             : page.html,
-        sidebar: buildSidebar(entriesOf(code), { section: model.section(resolved, code) }),
+        sidebar: noSidebar
+          ? []
+          : buildSidebar(entriesOf(code), { section: model.section(resolved, code) }),
         toc: page.toc,
         prevNext: getPrevNext(orderedOf(code), resolved),
         layout: page.frontMatter.layout,
         writing: page.frontMatter.writing,
+        noSidebar,
       });
 
       addCodeCopyButtons(app.article, t);

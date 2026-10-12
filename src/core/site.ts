@@ -12,6 +12,7 @@
 import {
   BLOG_DEFAULTS,
   type BlogRuntimeConfig,
+  hidesSidebar,
   localizeBlogConfig,
   resolveBlogView,
 } from './blog-views.js';
@@ -170,6 +171,7 @@ export function renderSite(input: SiteRenderInput): SitePage[] {
     let prevNext = {} as ReturnType<typeof getPrevNext>;
     let layout: string | undefined;
     let writing: string | undefined;
+    let noSidebar = false;
     let shellPath = route;
     let headExtra: Partial<Parameters<typeof buildHead>[0]> = {};
 
@@ -182,9 +184,11 @@ export function renderSite(input: SiteRenderInput): SitePage[] {
 
     if (view) {
       const own = view.hasOwnPage ? byPath.get(route) : undefined;
-      contentHTML = (own ? renderEntry(own, route).html : '') + view.html;
+      const ownPage = own ? renderEntry(own, route) : undefined;
+      contentHTML = (ownPage?.html ?? '') + view.html;
       title = view.title;
       sidebar = buildSidebar(model.entries(code), { section: view.section ?? undefined });
+      noSidebar = hidesSidebar(route, ownPage?.frontMatter, blog);
       headExtra = {};
     } else {
       const resolved = model.resolve(route, code);
@@ -201,6 +205,7 @@ export function renderSite(input: SiteRenderInput): SitePage[] {
       prevNext = getPrevNext(model.ordered(code), resolved);
       layout = page.frontMatter.layout;
       writing = page.frontMatter.writing;
+      noSidebar = hidesSidebar(resolved, page.frontMatter, blog);
       description = page.excerpt || site.description || '';
       const fm = page.frontMatter;
       const isArticle = Boolean(blog && resolved.startsWith(`/${blog.dir}/`) && fm.date);
@@ -237,7 +242,15 @@ export function renderSite(input: SiteRenderInput): SitePage[] {
       home,
       nav,
       path: shellPath,
-      page: { contentHTML, sidebar, toc, prevNext, layout, writing },
+      page: {
+        contentHTML,
+        sidebar: noSidebar ? [] : sidebar,
+        toc,
+        prevNext,
+        layout,
+        writing,
+        noSidebar,
+      },
       languages: setup ? { locales: setup.locales, current: code as string } : undefined,
     });
     return {
@@ -328,6 +341,7 @@ function renderDocument(
     attrs.push('blog');
     if (blog.dir !== BLOG_DEFAULTS.dir) attrs.push(`blog-dir="${escapeAttr(blog.dir)}"`);
     if (blog.perPage !== BLOG_DEFAULTS.perPage) attrs.push(`blog-per-page="${blog.perPage}"`);
+    if (!blog.sidebar) attrs.push('blog-sidebar="false"');
   }
   if (input.seo?.siteUrl) attrs.push(`site-url="${escapeAttr(input.seo.siteUrl)}"`);
   if (rt.search) attrs.push('search');

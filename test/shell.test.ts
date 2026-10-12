@@ -37,10 +37,11 @@ describe('renderShell parity with the runtime app shell', () => {
     { name: 'a docs page', layout: undefined, writing: undefined },
     { name: 'a home page', layout: 'home', writing: undefined },
     { name: 'a vertical page', layout: undefined, writing: 'vertical' },
+    { name: 'a page without a sidebar', layout: undefined, writing: undefined, noSidebar: true },
   ]) {
     it(`matches for ${variant.name}`, () => {
       const path = '/guide/start';
-      const sidebar = buildSidebar(entries, { section: '/guide' });
+      const sidebar = variant.noSidebar ? [] : buildSidebar(entries, { section: '/guide' });
       const ordered = flattenPages(buildSidebar(entries));
       const prevNext = getPrevNext(ordered, path);
       const toc = [
@@ -69,6 +70,7 @@ describe('renderShell parity with the runtime app shell', () => {
         prevNext,
         layout: variant.layout,
         writing: variant.writing,
+        noSidebar: variant.noSidebar,
       });
 
       const staticHTML = renderShell({
@@ -84,6 +86,7 @@ describe('renderShell parity with the runtime app shell', () => {
           prevNext,
           layout: variant.layout,
           writing: variant.writing,
+          noSidebar: variant.noSidebar,
         },
       });
       const holder = document.createElement('div');
