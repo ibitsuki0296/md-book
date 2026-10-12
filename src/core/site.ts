@@ -28,6 +28,7 @@ import {
   type HeadData,
   type SeoConfig,
   buildHead,
+  documentTitle,
   escapeAttr,
   escapeText,
   headToHTML,
@@ -225,7 +226,7 @@ export function renderSite(input: SiteRenderInput): SitePage[] {
 
     const head = buildHead(
       {
-        title: `${title} — ${site.title}`,
+        title: documentTitle(title, site.title),
         description,
         routePath: route,
         type: 'website',
