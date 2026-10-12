@@ -19,6 +19,12 @@ export interface AppOptions {
   router: Router;
   strings: UIStrings;
   slots?: Partial<Record<'navbarEnd' | 'sidebarTop' | 'pageFooter', SlotContent>>;
+  /**
+   * A pre-rendered `.md-book` root (from `renderShell`) to take over instead of building
+   * a new shell, so the page does not blank out while the runtime loads. Ignored when it
+   * lacks any of the expected regions.
+   */
+  adopt?: HTMLElement | null;
 }
 
 export interface PageState {
@@ -36,6 +42,8 @@ export interface PageState {
 
 export interface App {
   readonly root: HTMLElement;
+  /** True when the shell took over pre-rendered markup rather than building its own. */
+  readonly adopted: boolean;
   readonly content: HTMLElement;
   readonly article: HTMLElement;
   /** The header's trailing region — mount appends the theme toggle here. */
@@ -61,61 +69,49 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   const { router } = options;
   let strings = options.strings;
 
-  const brand = h(
-    'a',
-    { class: 'md-book-brand', href: router.href(options.site.home ?? '/') },
-    options.site.title,
-  );
-  const nav = h('nav', { class: 'md-book-nav', aria: { label: strings.mainNavLabel } });
-  const navbarEnd = h('div', { class: 'md-book-navbar-end' });
-  applySlot(navbarEnd, options.slots?.navbarEnd);
-
-  // Below the tablet breakpoint the sidebar is an off-canvas drawer (see layout.css).
-  const menuButton = h('button', {
-    class: 'md-book-menu-toggle',
-    type: 'button',
-    aria: { label: strings.menuLabel, expanded: 'false', controls: SIDEBAR_ID },
-  });
-  const navbarSearch = h('div', { class: 'md-book-navbar-search', hidden: true });
-  const header = h(
-    'header',
-    { class: 'md-book-header' },
-    menuButton,
+  const parts = (options.adopt && adoptParts(options.adopt)) || buildParts(options, strings);
+  const adopted = parts.adopted;
+  const {
+    root,
+    skip,
     brand,
     nav,
+    menuButton,
     navbarSearch,
     navbarEnd,
-  );
-
-  const sidebarTop = h('div', { class: 'md-book-sidebar__top' });
-  applySlot(sidebarTop, options.slots?.sidebarTop);
-  const sidebarNav = h('nav', {
-    class: 'md-book-sidebar__nav',
-    aria: { label: strings.sidebarLabel },
-  });
-  const sidebar = h('aside', { class: 'md-book-sidebar', id: SIDEBAR_ID }, sidebarTop, sidebarNav);
-
-  const article = h('article', { class: 'md-book-article' });
-  enableVerticalWheelScroll(article);
-  const pager = h('nav', { class: 'md-book-pager', aria: { label: strings.pageNavLabel } });
-  const pageFooter = h('footer', { class: 'md-book-page-footer' });
-  applySlot(pageFooter, options.slots?.pageFooter);
-  const content = h(
-    'main',
-    { class: 'md-book-main', id: CONTENT_ID, tabindex: '-1' },
+    sidebar,
+    sidebarTop,
+    sidebarNav,
     article,
     pager,
     pageFooter,
-  );
+    content,
+    tocNav,
+    backdrop,
+  } = parts;
 
-  const tocNav = h('nav', { class: 'md-book-toc', aria: { label: strings.onThisPageLabel } });
+  if (adopted) {
+    // Take over pre-rendered markup: keep the page regions as they are and reset the
+    // header regions the runtime fills itself (switcher, search, theme toggle, slots).
+    for (const region of [navbarEnd, sidebarTop, pageFooter]) {
+      region.replaceChildren();
+      region.hidden = false;
+    }
+    navbarSearch.replaceChildren();
+    navbarSearch.hidden = true;
+  }
+  applySlot(navbarEnd, options.slots?.navbarEnd);
+  applySlot(sidebarTop, options.slots?.sidebarTop);
+  applySlot(pageFooter, options.slots?.pageFooter);
+  enableVerticalWheelScroll(article);
+  // A fresh shell has no page yet; keep the footer out of sight until one renders.
+  const holdFooter = !adopted && !pageFooter.hidden;
+  if (holdFooter) pageFooter.hidden = true;
+  const showFooter = () => {
+    if (holdFooter) pageFooter.hidden = false;
+  };
 
-  const body = h('div', { class: 'md-book-body' }, sidebar, content, tocNav);
-  const backdrop = h('div', { class: 'md-book-backdrop', aria: { hidden: 'true' } });
-  const skip = h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, strings.skipToContent);
-  const root = h('div', { class: 'md-book' }, skip, header, backdrop, body);
-
-  target.replaceChildren(root);
+  if (!adopted) target.replaceChildren(root);
 
   const setMenu = (open: boolean, moveFocus = true) => {
     if (root.classList.contains('is-menu-open') === open) return;
@@ -144,6 +140,8 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     tocNav.setAttribute('aria-label', next.onThisPageLabel);
   };
 
+  if (adopted) setStrings(strings);
+
   const setSite = (site: AppSite) => {
     brand.textContent = site.title;
     brand.setAttribute('href', router.href(site.home ?? '/'));
@@ -166,6 +164,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   };
 
   const renderPage = (state: PageState) => {
+    showFooter();
     article.innerHTML = state.contentHTML;
     setVertical(state.writing === 'vertical');
     replaceChildren(sidebarNav, renderSidebar(state.sidebar, router, state.path));
@@ -180,6 +179,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
   };
 
   const renderMessage = (title: string, bodyText: string) => {
+    showFooter();
     root.classList.remove('md-book--home');
     setVertical(false);
     article.replaceChildren(h('h1', {}, title), h('p', {}, bodyText));
@@ -197,6 +197,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
 
   return {
     root,
+    adopted,
     content,
     article,
     navbarEnd,
@@ -208,6 +209,124 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     renderMessage,
     setActiveHeading,
     focusContent: () => content.focus({ preventScroll: true }),
+  };
+}
+
+interface ShellParts {
+  adopted: boolean;
+  root: HTMLElement;
+  skip: HTMLAnchorElement;
+  brand: HTMLAnchorElement;
+  nav: HTMLElement;
+  menuButton: HTMLButtonElement;
+  navbarSearch: HTMLElement;
+  navbarEnd: HTMLElement;
+  sidebar: HTMLElement;
+  sidebarTop: HTMLElement;
+  sidebarNav: HTMLElement;
+  article: HTMLElement;
+  pager: HTMLElement;
+  pageFooter: HTMLElement;
+  content: HTMLElement;
+  tocNav: HTMLElement;
+  backdrop: HTMLElement;
+}
+
+/** Looks up the regions of a pre-rendered shell; null when any is missing (→ build fresh). */
+function adoptParts(root: HTMLElement): ShellParts | null {
+  const q = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector);
+  const parts = {
+    skip: q<HTMLAnchorElement>('.md-book-skip'),
+    brand: q<HTMLAnchorElement>('.md-book-brand'),
+    nav: q('.md-book-nav'),
+    menuButton: q<HTMLButtonElement>('.md-book-menu-toggle'),
+    navbarSearch: q('.md-book-navbar-search'),
+    navbarEnd: q('.md-book-navbar-end'),
+    sidebar: q('.md-book-sidebar'),
+    sidebarTop: q('.md-book-sidebar__top'),
+    sidebarNav: q('.md-book-sidebar__nav'),
+    article: q('.md-book-article'),
+    pager: q('.md-book-pager'),
+    pageFooter: q('.md-book-page-footer'),
+    content: q('.md-book-main'),
+    tocNav: q('.md-book-toc'),
+    backdrop: q('.md-book-backdrop'),
+  };
+  for (const part of Object.values(parts)) if (!part) return null;
+  return { adopted: true, root, ...parts } as ShellParts;
+}
+
+/** Builds a fresh, empty shell. Keep in step with `core/shell.ts` (see test/shell.test.ts). */
+function buildParts(options: AppOptions, strings: UIStrings): ShellParts {
+  const { router } = options;
+  const brand = h(
+    'a',
+    { class: 'md-book-brand', href: router.href(options.site.home ?? '/') },
+    options.site.title,
+  );
+  const nav = h('nav', { class: 'md-book-nav', aria: { label: strings.mainNavLabel } });
+  const navbarEnd = h('div', { class: 'md-book-navbar-end' });
+
+  // Below the tablet breakpoint the sidebar is an off-canvas drawer (see layout.css).
+  const menuButton = h('button', {
+    class: 'md-book-menu-toggle',
+    type: 'button',
+    aria: { label: strings.menuLabel, expanded: 'false', controls: SIDEBAR_ID },
+  });
+  const navbarSearch = h('div', { class: 'md-book-navbar-search', hidden: true });
+  const header = h(
+    'header',
+    { class: 'md-book-header' },
+    menuButton,
+    brand,
+    nav,
+    navbarSearch,
+    navbarEnd,
+  );
+
+  const sidebarTop = h('div', { class: 'md-book-sidebar__top' });
+  const sidebarNav = h('nav', {
+    class: 'md-book-sidebar__nav',
+    aria: { label: strings.sidebarLabel },
+  });
+  const sidebar = h('aside', { class: 'md-book-sidebar', id: SIDEBAR_ID }, sidebarTop, sidebarNav);
+
+  const article = h('article', { class: 'md-book-article' });
+  const pager = h('nav', { class: 'md-book-pager', aria: { label: strings.pageNavLabel } });
+  const pageFooter = h('footer', { class: 'md-book-page-footer' });
+  const content = h(
+    'main',
+    { class: 'md-book-main', id: CONTENT_ID, tabindex: '-1' },
+    article,
+    pager,
+    pageFooter,
+  );
+
+  const tocNav = h('nav', { class: 'md-book-toc', aria: { label: strings.onThisPageLabel } });
+
+  const body = h('div', { class: 'md-book-body' }, sidebar, content, tocNav);
+  const backdrop = h('div', { class: 'md-book-backdrop', aria: { hidden: 'true' } });
+  const skip = h('a', { class: 'md-book-skip', href: `#${CONTENT_ID}` }, strings.skipToContent);
+  const root = h('div', { class: 'md-book' }, skip, header, backdrop, body);
+
+  return {
+    adopted: false,
+    root,
+    skip,
+    brand,
+    nav,
+    menuButton,
+    navbarSearch,
+    navbarEnd,
+    sidebar,
+    sidebarTop,
+    sidebarNav,
+    article,
+    pager,
+    pageFooter,
+    content,
+    tocNav,
+    backdrop,
   };
 }
 

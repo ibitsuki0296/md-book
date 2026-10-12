@@ -244,7 +244,7 @@ export function renderSite(input: SiteRenderInput): SitePage[] {
       route,
       file: routeToFile(route),
       title,
-      html: renderDocument(input, model, base, langTag, head, shell),
+      html: renderDocument(input, model, base, langTag, head, shell, route),
     };
   };
 
@@ -307,6 +307,8 @@ function renderDocument(
   langTag: string,
   head: HeadData,
   shell: string,
+  /** Route the shell was rendered for; stamped so the runtime can adopt the markup. */
+  route?: string,
 ): string {
   const assets = input.assets ?? {};
   const style = assets.style ?? 'style.css';
@@ -331,6 +333,7 @@ function renderDocument(
   if (rt.search) attrs.push('search');
   if (rt.math) attrs.push('math');
   if (rt.mermaid) attrs.push('mermaid');
+  if (route !== undefined) attrs.push(`data-prerendered="${escapeAttr(route)}"`);
 
   const themeKey = input.themeStorageKey ?? DEFAULT_THEME_STORAGE_KEY;
   return `${[

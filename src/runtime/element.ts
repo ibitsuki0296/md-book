@@ -67,6 +67,14 @@ export class MdBookElement extends HTMLElement {
     const slots = this.collectSlots();
     const options: MountOptions = { slots };
 
+    // `md-book build` stamps the route its markup was rendered for. Hand it to mount()
+    // once (a later re-render starts from an empty host) so the DOM can be adopted.
+    const prerendered = this.getAttribute('data-prerendered');
+    if (prerendered !== null) {
+      options.prerendered = prerendered;
+      this.removeAttribute('data-prerendered');
+    }
+
     const manifestUrl = this.getAttribute('manifest');
     if (manifestUrl) options.manifestUrl = manifestUrl;
     const base = this.getAttribute('base');

@@ -90,6 +90,12 @@ export interface MountOptions {
   /** Social / canonical / JSON-LD metadata written to `<head>` on navigation. */
   seo?: SeoConfig;
   slots?: Partial<Record<'navbarEnd' | 'sidebarTop' | 'pageFooter', SlotContent>>;
+  /**
+   * Route (base-relative) the host's existing markup was pre-rendered for by `md-book
+   * build`. When the first navigation lands on that route, the runtime takes over the
+   * pre-rendered DOM instead of rebuilding it — no blank-out, no second render.
+   */
+  prerendered?: string;
   /** Test / transport overrides. */
   fetchText?: (url: string) => Promise<string>;
   fetchJson?: (url: string) => Promise<unknown>;
@@ -172,7 +178,13 @@ export async function mount(
     router,
     strings: t,
     slots: options.slots,
+    adopt:
+      options.prerendered === undefined
+        ? null
+        : host.querySelector<HTMLElement>(':scope > .md-book'),
   });
+  // Only the first navigation may reuse the pre-rendered page, and only for its own route.
+  let hydrateRoute = app.adopted ? options.prerendered : undefined;
   app.renderNav(model.nav(localeCode));
 
   const theme = createThemeController({
@@ -278,6 +290,13 @@ export async function mount(
 
   async function navigateTo(path: string, hash: string): Promise<void> {
     const token = ++renderToken;
+    const hydrating = hydrateRoute;
+    hydrateRoute = undefined;
+    const hydrateIn = (route: string): boolean => {
+      if (hydrating !== route) return false;
+      addCodeCopyButtons(app.article, t);
+      return true;
+    };
     const code = model.localeOf(path);
     activateLocale(code);
     const blog = blogFor(code);
@@ -288,6 +307,12 @@ export async function mount(
         locale: langTag,
       });
       if (view) {
+        if (hydrateIn(path)) {
+          typeset();
+          scrollSpy?.disconnect();
+          scrollSpy = null;
+          return;
+        }
         let leadingHTML = '';
         if (view.hasOwnPage) {
           try {
@@ -329,6 +354,20 @@ export async function mount(
     }
 
     const resolved = model.resolve(path, code);
+
+    if (resolved && hydrateIn(resolved)) {
+      if (options.highlight) await applyHighlight(app.article, options.highlight);
+      typeset();
+      scrollSpy?.disconnect();
+      scrollSpy = createScrollSpy({
+        content: app.article,
+        ids: [...app.article.querySelectorAll('[id]')]
+          .filter((el) => /^H[1-6]$/.test(el.tagName))
+          .map((el) => el.id),
+        onActive: (id) => app.setActiveHeading(id),
+      });
+      return;
+    }
 
     if (!resolved) {
       app.renderMessage(t.pageNotFound, t.pageNotFoundBody(path));
