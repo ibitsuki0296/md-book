@@ -1,6 +1,7 @@
 ---
 title: Blog
 description: Release notes and project updates.
+order: 3
 ---
 
 # Blog

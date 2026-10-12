@@ -2,7 +2,7 @@
 title: 短歌
 description: 縦書き表示のデモ。石川啄木『一握の砂』より。
 writing: vertical
-order: 90
+order: 2
 ---
 
 # 短歌
