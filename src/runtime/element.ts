@@ -31,6 +31,7 @@ export class MdBookElement extends HTMLElement {
       'blog',
       'blog-dir',
       'blog-per-page',
+      'blog-sidebar',
       'site-url',
       'search',
       'math',
@@ -104,6 +105,7 @@ export class MdBookElement extends HTMLElement {
       if (dir) blog.dir = dir;
       const perPage = Number.parseInt(this.getAttribute('blog-per-page') ?? '', 10);
       if (Number.isFinite(perPage) && perPage > 0) blog.perPage = perPage;
+      if (this.getAttribute('blog-sidebar') === 'false') blog.sidebar = false;
       options.blog = Object.keys(blog).length > 0 ? blog : true;
     }
 

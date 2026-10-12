@@ -20,6 +20,8 @@ export interface ShellPage {
   layout?: string;
   /** Front-matter `writing`; `vertical` switches the article to 縦書き. */
   writing?: string;
+  /** Render without the sidebar (front matter `sidebar: false`, or the blog's `sidebar: false`). */
+  noSidebar?: boolean;
 }
 
 export interface ShellInput {
@@ -44,10 +46,15 @@ export function renderShell(input: ShellInput): string {
   const { strings: t, page, href } = input;
   const home = page.layout === 'home';
   const vertical = page.writing === 'vertical';
-  const rootClass = ['md-book', vertical ? 'md-book--vertical' : '', home ? 'md-book--home' : '']
+  const rootClass = [
+    'md-book',
+    vertical ? 'md-book--vertical' : '',
+    home ? 'md-book--home' : '',
+    page.noSidebar ? 'md-book--no-sidebar' : '',
+  ]
     .filter(Boolean)
     .join(' ');
-  const menuHidden = home || page.sidebar.length === 0;
+  const menuHidden = home || page.noSidebar || page.sidebar.length === 0;
 
   const navLinks = input.nav
     .map((item) => {

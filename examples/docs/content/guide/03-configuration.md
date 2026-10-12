@@ -17,6 +17,7 @@ description: Every mount() option and <md-book> attribute.
 | `blog` | Present ⇒ enable blog routes |
 | `blog-dir` | Blog directory (default `blog`) |
 | `blog-per-page` | Posts per list page (default `10`) |
+| `blog-sidebar` | `false` hides the sidebar on blog pages (list, tags, categories, posts) |
 | `site-url` | Absolute site URL for canonical / Open Graph links |
 
 Children with `slot="navbar-end"`, `slot="sidebar-top"`, or `slot="page-footer"`
@@ -55,6 +56,7 @@ categories: [Handbook]
 draft: true             # hidden from production builds
 order: 2                # sidebar position within a directory
 slug: custom-slug       # overrides the path-derived slug
+sidebar: false          # hide the sidebar on this page
 cover: /img/cover.png
 author: Your Name
 ---

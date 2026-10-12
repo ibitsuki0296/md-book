@@ -138,6 +138,7 @@ order: 2                # sidebar position among siblings
 slug: custom-slug       # overrides the slug derived from the file name
 layout: home            # landing page with hero and feature cards
 writing: vertical       # vertical writing (縦書き)
+sidebar: false          # hide the sidebar on this page
 ---
 ```
 
@@ -216,7 +217,7 @@ prefetching, code copy buttons, TOC scroll-spy, a light/dark toggle and SEO tags
 | `heading` | Site title for the header and `<title>` |
 | `lang` | UI language: `en` or `ja` |
 | `theme` | Initial mode: `light`, `dark` or `system` |
-| `blog`, `blog-dir`, `blog-per-page` | Enable and configure the blog (full option list under [Blog](#blog)) |
+| `blog`, `blog-dir`, `blog-per-page`, `blog-sidebar` | Enable and configure the blog (full option list under [Blog](#blog)) |
 | `search` | Add the search box |
 | `math`, `mermaid` | Turn on math and diagrams |
 | `site-url` | Absolute site URL for canonical / Open Graph links |
@@ -305,6 +306,7 @@ All blog config knobs, with their default and where each is settable:
 | Enable the blog | off | `blog` | `true` | `--blog` |
 | Post directory | `blog` | `blog-dir` | `dir` | `--blog-dir <name>` |
 | Posts per page | `10` | `blog-per-page` | `perPage` | `--blog-per-page <n>` |
+| Sidebar on blog pages | shown | `blog-sidebar="false"` | `sidebar: false` | `--blog-no-sidebar` |
 | Tag index base path | `/tags` | — | `tagsBase` | — |
 | Category index base path | `/categories` | — | `categoriesBase` | — |
 

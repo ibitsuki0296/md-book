@@ -45,6 +45,7 @@ build options:
   --blog                Blog list / tag / category routes (+ feeds with --site-url)
   --blog-dir <name>     Blog directory (default: blog)
   --blog-per-page <n>   Posts per page (default: 10)
+  --blog-no-sidebar     Hide the sidebar on blog pages
   --search              Write search-index.json and enable the search box
   --math                TeX math ($x$, $$x$$); pre-rendered when katex is installed
   --mermaid             Mermaid diagrams (drawn in the browser)
@@ -191,6 +192,7 @@ async function runBuild(args: string[]): Promise<number> {
       blog: { type: 'boolean', default: false },
       'blog-dir': { type: 'string' },
       'blog-per-page': { type: 'string' },
+      'blog-no-sidebar': { type: 'boolean', default: false },
       search: { type: 'boolean', default: false },
       math: { type: 'boolean', default: false },
       mermaid: { type: 'boolean', default: false },
@@ -212,6 +214,7 @@ async function runBuild(args: string[]): Promise<number> {
   const blogOverrides = {
     ...(values['blog-dir'] ? { dir: values['blog-dir'] } : {}),
     ...(perPage && perPage > 0 ? { perPage } : {}),
+    ...(values['blog-no-sidebar'] ? { sidebar: false } : {}),
   };
   const outDir = values.out ?? 'dist-site';
   const { pages, files } = await buildSite({

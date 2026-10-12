@@ -15,6 +15,8 @@ export interface BlogRuntimeConfig {
   perPage: number;
   tagsBase: string;
   categoriesBase: string;
+  /** Show the sidebar on blog routes (list, taxonomy, posts). Default `true`. */
+  sidebar: boolean;
 }
 
 export const BLOG_DEFAULTS: BlogRuntimeConfig = {
@@ -22,6 +24,7 @@ export const BLOG_DEFAULTS: BlogRuntimeConfig = {
   perPage: 10,
   tagsBase: '/tags',
   categoriesBase: '/categories',
+  sidebar: true,
 };
 
 /**
@@ -36,6 +39,26 @@ export function localizeBlogConfig(config: BlogRuntimeConfig, prefix: string): B
     tagsBase: `${prefix}${config.tagsBase}`,
     categoriesBase: `${prefix}${config.categoriesBase}`,
   };
+}
+
+/** True for the blog list, its posts and the tag / category routes (config already localized). */
+export function isBlogRoute(route: string, config: BlogRuntimeConfig): boolean {
+  return [`/${config.dir}`, config.tagsBase, config.categoriesBase].some(
+    (root) => route === root || route.startsWith(`${root}/`),
+  );
+}
+
+/**
+ * Whether `route` renders without a sidebar: front matter `sidebar: false` on a page, or
+ * `sidebar: false` in the blog config for every blog route.
+ */
+export function hidesSidebar(
+  route: string,
+  frontMatter: Record<string, unknown> | undefined,
+  blog: BlogRuntimeConfig | null,
+): boolean {
+  if (frontMatter?.sidebar === false) return true;
+  return Boolean(blog && !blog.sidebar && isBlogRoute(route, blog));
 }
 
 /** Locale-aware bits threaded through the blog views. */

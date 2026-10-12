@@ -103,6 +103,20 @@
     margin-inline: auto;
   }
 
+  /* `sidebar: false`: the sidebar goes away, the article and TOC stay. */
+  .md-book--no-sidebar .md-book-body {
+    grid-template-columns: minmax(0, 1fr) var(--md-book-toc-width);
+  }
+
+  .md-book--no-sidebar .md-book-sidebar {
+    display: none;
+  }
+
+  .md-book--no-sidebar .md-book-main {
+    width: 100%;
+    margin-inline: auto;
+  }
+
   /* Prose below the hero keeps the normal reading measure. */
   .md-book--home .md-book-article > :not(.md-book-hero, .md-book-features) {
     max-width: var(--md-book-measure);
@@ -121,6 +135,9 @@
     }
     .md-book-toc {
       display: none;
+    }
+    .md-book--no-sidebar .md-book-body {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 

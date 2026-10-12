@@ -38,6 +38,8 @@ export interface PageState {
   layout?: string;
   /** Front-matter `writing`; `vertical` switches the article to 縦書き. */
   writing?: string;
+  /** Render without the sidebar (front matter `sidebar: false`, or the blog's `sidebar: false`). */
+  noSidebar?: boolean;
 }
 
 export interface App {
@@ -172,7 +174,8 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
     tocNav.hidden = state.toc.length === 0;
     const home = state.layout === 'home';
     root.classList.toggle('md-book--home', home);
-    menuButton.hidden = home || state.sidebar.length === 0;
+    root.classList.toggle('md-book--no-sidebar', Boolean(state.noSidebar));
+    menuButton.hidden = home || Boolean(state.noSidebar) || state.sidebar.length === 0;
     setMenu(false, false);
     replaceChildren(pager, ...renderPager(state.prevNext, router, strings));
     highlightCurrent(nav, router.current);
@@ -180,7 +183,7 @@ export function createApp(target: HTMLElement, options: AppOptions): App {
 
   const renderMessage = (title: string, bodyText: string) => {
     showFooter();
-    root.classList.remove('md-book--home');
+    root.classList.remove('md-book--home', 'md-book--no-sidebar');
     setVertical(false);
     article.replaceChildren(h('h1', {}, title), h('p', {}, bodyText));
     replaceChildren(pager);
