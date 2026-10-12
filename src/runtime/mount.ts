@@ -13,6 +13,7 @@ import {
   getPrevNext,
   stripManifestBase,
 } from '../core/content.js';
+import { documentTitle } from '../core/head.js';
 import { renderHome } from '../core/home.js';
 import { type UIStrings, createStrings } from '../core/i18n.js';
 import { type LocaleConfig, type LocaleSetup, localizeRoute } from '../core/locale.js';
@@ -342,7 +343,7 @@ export async function mount(
         typeset();
         applyHead(
           {
-            title: `${view.title} — ${site.title}`,
+            title: documentTitle(view.title, site.title),
             description: site.description || '',
             routePath: path,
             type: 'website',
@@ -412,7 +413,7 @@ export async function mount(
       );
       applyHead(
         {
-          title: `${pageTitle} — ${site.title}`,
+          title: documentTitle(pageTitle, site.title),
           description: page.excerpt || site.description || '',
           routePath: resolved,
           type: isArticle ? 'article' : 'website',

@@ -63,6 +63,13 @@ export interface HeadContext {
   origin?: string;
 }
 
+/** `<title>` text: `Page — Site`, or just the site title when the page is named after the site. */
+export function documentTitle(pageTitle: string, siteTitle: string): string {
+  const page = pageTitle.trim();
+  const site = siteTitle.trim();
+  return !site || page === site ? page || site : `${page} — ${site}`;
+}
+
 export function buildHead(
   input: HeadInput,
   config: SeoConfig,
