@@ -1,5 +1,11 @@
 # @ibitsuki0296/md-book
 
+## 0.4.1
+
+### Patch Changes
+
+- 0df5b0d: A page whose title equals the site title no longer gets the site name appended: the home page's `<title>` / `og:title` / `twitter:title` is now `My Site` instead of `My Site — My Site`. Other pages stay `Page — My Site`.
+
 ## 0.4.0
 
 ### Minor Changes
