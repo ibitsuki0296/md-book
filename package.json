@@ -1,6 +1,6 @@
 {
   "name": "@ibitsuki0296/md-book",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Runtime-first Markdown documentation & blog site library with token-based theming, static build, search, math/diagrams and i18n",
   "type": "module",
   "license": "MIT",
