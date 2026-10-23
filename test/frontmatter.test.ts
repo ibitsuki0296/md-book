@@ -39,4 +39,18 @@ describe('parseFrontMatter', () => {
     const r = parseFrontMatter('---\ndate: 2026-02-01\n---\n');
     expect(r.data.date).toBeInstanceOf(Date);
   });
+
+  it('keeps the date at UTC midnight', () => {
+    const r = parseFrontMatter('---\ndate: 2026-02-01\n---\n');
+    expect((r.data.date as Date).toISOString()).toBe('2026-02-01T00:00:00.000Z');
+  });
+
+  it('resolves anchors and merge keys', () => {
+    const r = parseFrontMatter('---\nbase: &b\n  a: 1\nitem:\n  <<: *b\n  c: 2\n---\n');
+    expect(r.data.item).toEqual({ a: 1, c: 2 });
+  });
+
+  it('does not execute or construct JS-specific YAML tags', () => {
+    expect(() => parseFrontMatter('---\nx: !!js/function "function(){}"\n---\n')).toThrow();
+  });
 });
