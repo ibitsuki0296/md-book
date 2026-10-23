@@ -9,3 +9,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Major bumps (TypeScript, markdown-it, js-yaml, …) change behaviour or
+    # types and need a hand-made migration; do those deliberately. Security
+    # updates are not affected by `ignore`.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
