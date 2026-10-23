@@ -106,7 +106,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.10.2",
-    "happy-dom": "^20.11.15",
+    "happy-dom": "^21.0.3",
     "lefthook": "^1.10.1",
     "size-limit": "^11.1.6",
     "tsup": "^8.3.5",
